@@ -1,5 +1,6 @@
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { Colors } from "../constants/colors";
 
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
@@ -10,41 +11,14 @@ import TasksScreen from "../screens/TasksScreen";
 import CalendarScreen from "../screens/CalendarScreen";
 import ChatsScreen from "../screens/ChatsScreen";
 import ProfileScreen from "../screens/ProfileScreen";
+import TabBar from "../compnents/TabBar";
 
 const Tab = createBottomTabNavigator();
 
 export default function Navigation() {
   return (
     <NavigationContainer>
-      <Tab.Navigator
-        screenOptions={({ route }) => ({
-          tabBarIcon: ({ focused, color, size }) => {
-            let iconName: any;
-
-            switch (route.name) {
-              case "Home":
-                iconName = "home";
-                break;
-              case "Tasks":
-                iconName = "task";
-                break;
-              case "Calendar":
-                iconName = "calendar-month";
-                break;
-              case "Chats":
-                iconName = "chat";
-                break;
-              case "Profile":
-                iconName = "person";
-                break;
-            }
-
-            return <MaterialIcons name={iconName} size={size} color={color} />;
-          },
-          tabBarActiveTintColor: "blue",
-          tabBarInactiveTintColor: "black",
-        })}
-      >
+      <Tab.Navigator tabBar={(props) => <TabBar {...props} />}>
         <Tab.Screen
           name="Home"
           component={HomeScreen}
