@@ -1,5 +1,16 @@
-import { Text } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
 export default function HomeScreen() {
-  return <Text>Home Screen</Text>;
+  return (
+    <View style={styles.container}>
+      <Text>Home Screen</Text>
+    </View>
+  );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: "#FFF",
+    height: "100%",
+  },
+});
