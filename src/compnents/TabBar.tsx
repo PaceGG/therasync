@@ -71,7 +71,7 @@ const CustomTabBar = ({
           >
             <AnimatedIcon
               name={icons[index] as any}
-              size={24}
+              size={26}
               style={animatedIconStyle}
             />
           </TouchableOpacity>
