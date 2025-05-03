@@ -12,6 +12,7 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "assetBundlePatterns": ["**/*", "assets/fonts/MPLUSRounded1c-Regular.ttf"],
     "ios": {
       "supportsTablet": true
     },
