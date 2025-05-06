@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet, TextInput } from "react-native";
 import { Colors } from "../constants/colors";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useState } from "react";
+
 export default function ProfileScreen() {
   const [editing, setEditing] = useState(false);
   const [inputText, setInputText] = useState("");
@@ -69,6 +70,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 20,
     paddingVertical: 20,
+    borderBottomLeftRadius: 15,
+    borderBottomRightRadius: 15,
   },
   avatar: {
     width: 120,
