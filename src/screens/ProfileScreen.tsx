@@ -1,14 +1,39 @@
-import { Text, Image, View, TouchableOpacity } from "react-native";
+import { Text, Image, View, TouchableOpacity, Alert } from "react-native";
 import { ScrollView, StyleSheet, TextInput } from "react-native";
 import { Colors } from "../constants/colors";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import UserOption from "../components/UserOption";
+import * as ImagePicker from "expo-image-picker";
 
 export default function ProfileScreen() {
+  const [avatarUri, setAvatarUri] = useState<string>("");
   const [editing, setEditing] = useState(false);
   const [inputText, setInputText] = useState("");
   const [username, setUsername] = useState("Ваше имя");
+
+  useEffect(() => {
+    (async () => {
+      const { status } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert("Ошибка", "Нужно разрешение на доступ к галерее");
+      }
+    })();
+  }, []);
+
+  const pickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setAvatarUri(result.assets[0].uri);
+    }
+  };
 
   const handlePress = () => {
     setEditing(true);
@@ -27,10 +52,14 @@ export default function ProfileScreen() {
     <ScrollView style={styles.mainContainer}>
       {/* user header */}
       <View style={styles.userHeader}>
-        <Image
-          source={require("../assets/avatar.jpg")}
-          style={styles.avatar}
-        ></Image>
+        <TouchableOpacity onPress={pickImage}>
+          <Image
+            source={
+              avatarUri ? { uri: avatarUri } : require("../assets/noavatar.png")
+            }
+            style={styles.avatar}
+          ></Image>
+        </TouchableOpacity>
         {editing ? (
           <View style={{ flexDirection: "row", alignItems: "center" }}>
             <TextInput
