@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet, TextInput } from "react-native";
 import { Colors } from "../constants/colors";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useState } from "react";
+import UserOption from "../components/UserOption";
 
 export default function ProfileScreen() {
   const [editing, setEditing] = useState(false);
@@ -56,7 +57,10 @@ export default function ProfileScreen() {
           </TouchableOpacity>
         )}
       </View>
+
       {/* user options */}
+      <UserOption iconName="person" title="Личные данные" />
+      <UserOption iconName="settings" title="Настройки" />
     </ScrollView>
   );
 }
@@ -72,6 +76,7 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     borderBottomLeftRadius: 15,
     borderBottomRightRadius: 15,
+    marginBottom: 28,
   },
   avatar: {
     width: 120,
