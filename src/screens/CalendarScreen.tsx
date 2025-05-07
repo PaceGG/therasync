@@ -5,6 +5,7 @@ import { Colors } from "../constants/colors";
 import { format } from "date-fns";
 import { MaterialIcons } from "@expo/vector-icons";
 import { ru } from "date-fns/locale";
+import CustomButton from "../components/CustomButton";
 
 LocaleConfig.locales["ru"] = {
   monthNames: [
@@ -53,6 +54,10 @@ LocaleConfig.defaultLocale = "ru";
 export default function CalendarScreen() {
   const today = format(new Date(), "yyyy-MM-dd");
   const [selected, setSelected] = useState(today);
+
+  const handleAddRecord = () => {
+    console.log("lg");
+  };
 
   return (
     <View style={styles.container}>
@@ -116,6 +121,11 @@ export default function CalendarScreen() {
             {format(new Date(selected), "d MMMM", { locale: ru })}
           </Text>
         </View>
+        <CustomButton
+          title="Добавить запись"
+          backgroundColorProp={Colors.lightPrimary}
+          onClick={handleAddRecord}
+        />
       </View>
     </View>
   );
@@ -134,6 +144,7 @@ const styles = StyleSheet.create({
   },
   modal: {
     backgroundColor: Colors.containerBackground,
+    gap: 22,
     padding: 20,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
