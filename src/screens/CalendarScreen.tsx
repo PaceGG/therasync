@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { ScrollView, View, Text, StyleSheet } from "react-native";
 import { Calendar, LocaleConfig } from "react-native-calendars";
 import { Colors } from "../constants/colors";
 import { format } from "date-fns";
 import { MaterialIcons } from "@expo/vector-icons";
 import { ru } from "date-fns/locale";
 import CustomButton from "../components/CustomButton";
-import { useNavigation } from "@react-navigation/native";
 import AddRecordScreen from "./AddRecordScreen";
+import Task from "../components/Task";
 
 LocaleConfig.locales["ru"] = {
   monthNames: [

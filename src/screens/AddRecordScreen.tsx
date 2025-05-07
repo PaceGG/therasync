@@ -10,6 +10,7 @@ import {
 import DateTimePicker from "@react-native-community/datetimepicker";
 import CustomButton from "../components/CustomButton";
 import { Colors } from "../constants/colors";
+import formatTime from "../utils/utilFunctions";
 
 type Props = {
   selectedDate: any;
@@ -34,12 +35,6 @@ export default function AddRecordScreen({
     } else if (showPicker === "end") {
       setEndTime(selectedTime);
     }
-  };
-
-  const formatTime = (date: Date | null) => {
-    return date
-      ? date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-      : "--:--";
   };
 
   return (
