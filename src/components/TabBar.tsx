@@ -46,38 +46,47 @@ const CustomTabBar = ({
     }
   };
 
+  const containerStyle = useAnimatedStyle(() => {
+    return {
+      backgroundColor:
+        currentIndex.value === 2 ? Colors.containerBackground : "white",
+    };
+  });
+
   return (
-    <View style={styles.tabBar}>
-      <Animated.View style={[styles.bubble, bubbleStyle]} />
+    <Animated.View style={containerStyle}>
+      <View style={styles.tabBar}>
+        <Animated.View style={[styles.bubble, bubbleStyle]} />
 
-      {state.routes.map((route, index) => {
-        const focused = state.index === index;
+        {state.routes.map((route, index) => {
+          const focused = state.index === index;
 
-        const animatedIconStyle = useAnimatedStyle(() => {
-          const color = interpolateColor(
-            currentIndex.value,
-            [index - 1, index, index + 1],
-            [Colors.icon, "white", Colors.icon]
+          const animatedIconStyle = useAnimatedStyle(() => {
+            const color = interpolateColor(
+              currentIndex.value,
+              [index - 1, index, index + 1],
+              [Colors.icon, "white", Colors.icon]
+            );
+            return { color };
+          });
+
+          return (
+            <TouchableOpacity
+              key={index}
+              onPress={() => onPress(index, route.name, focused)}
+              style={styles.tabButton}
+              activeOpacity={0.8}
+            >
+              <AnimatedIcon
+                name={icons[index] as any}
+                size={26}
+                style={animatedIconStyle}
+              />
+            </TouchableOpacity>
           );
-          return { color };
-        });
-
-        return (
-          <TouchableOpacity
-            key={index}
-            onPress={() => onPress(index, route.name, focused)}
-            style={styles.tabButton}
-            activeOpacity={0.8}
-          >
-            <AnimatedIcon
-              name={icons[index] as any}
-              size={26}
-              style={animatedIconStyle}
-            />
-          </TouchableOpacity>
-        );
-      })}
-    </View>
+        })}
+      </View>
+    </Animated.View>
   );
 };
 
@@ -85,7 +94,7 @@ const styles = StyleSheet.create({
   tabBar: {
     flexDirection: "row",
     height: 70,
-    backgroundColor: Colors.containerBackground,
+    backgroundColor: Colors.lightContainerBackground,
     position: "relative",
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,

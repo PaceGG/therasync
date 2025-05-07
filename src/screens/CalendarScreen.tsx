@@ -4,6 +4,7 @@ import { Calendar, LocaleConfig } from "react-native-calendars";
 import { Colors } from "../constants/colors";
 import { format } from "date-fns";
 import { MaterialIcons } from "@expo/vector-icons";
+import { ru } from "date-fns/locale";
 
 LocaleConfig.locales["ru"] = {
   monthNames: [
@@ -50,8 +51,8 @@ LocaleConfig.locales["ru"] = {
 LocaleConfig.defaultLocale = "ru";
 
 export default function CalendarScreen() {
-  const [selected, setSelected] = useState("");
   const today = format(new Date(), "yyyy-MM-dd");
+  const [selected, setSelected] = useState(today);
 
   return (
     <View style={styles.container}>
@@ -103,11 +104,19 @@ export default function CalendarScreen() {
         firstDay={1}
         enableSwipeMonths={true}
       />
-      {selected ? (
-        <Text style={styles.info}>Вы выбрали: {selected}</Text>
-      ) : (
-        <Text style={styles.info}>Дата не выбрана</Text>
-      )}
+
+      <View style={styles.modal}>
+        <View style={styles.date}>
+          {selected === today ? (
+            <Text style={{ fontSize: 20, marginRight: 14 }}>Сегодня</Text>
+          ) : (
+            <></>
+          )}
+          <Text style={{ fontSize: 15 }}>
+            {format(new Date(selected), "d MMMM", { locale: ru })}
+          </Text>
+        </View>
+      </View>
     </View>
   );
 }
@@ -115,12 +124,22 @@ export default function CalendarScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
     backgroundColor: "#FFF",
+    justifyContent: "space-between",
   },
   info: {
     marginTop: 20,
     textAlign: "center",
     fontSize: 16,
+  },
+  modal: {
+    backgroundColor: Colors.containerBackground,
+    padding: 20,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+  },
+  date: {
+    flexDirection: "row",
+    alignItems: "baseline",
   },
 });
