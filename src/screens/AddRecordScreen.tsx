@@ -1,12 +1,13 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
   TextInput,
   StyleSheet,
-  ScrollView,
   TouchableOpacity,
+  Platform,
 } from "react-native";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import CustomButton from "../components/CustomButton";
 import { Colors } from "../constants/colors";
 
@@ -19,28 +20,57 @@ export default function AddRecordScreen({
   selectedDate,
   confirmAddRecord,
 }: Props) {
-  const [startTime, setStartTime] = useState("");
-  const [endTime, setEndTime] = useState("");
+  const [startTime, setStartTime] = useState<Date | null>(null);
+  const [endTime, setEndTime] = useState<Date | null>(null);
+  const [showPicker, setShowPicker] = useState<"start" | "end" | null>(null);
   const [search, setSearch] = useState("");
+
+  const handleTimeChange = (event: any, selectedTime?: Date) => {
+    if (Platform.OS !== "ios") setShowPicker(null);
+    if (!selectedTime) return;
+
+    if (showPicker === "start") {
+      setStartTime(selectedTime);
+    } else if (showPicker === "end") {
+      setEndTime(selectedTime);
+    }
+  };
+
+  const formatTime = (date: Date | null) => {
+    return date
+      ? date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+      : "--:--";
+  };
 
   return (
     <View style={styles.container}>
       <Text style={styles.date}>{selectedDate}</Text>
 
       <View style={styles.timeContainer}>
-        <TextInput
+        <TouchableOpacity
           style={styles.inputTime}
-          placeholder="начало"
-          value={startTime}
-          onChangeText={setStartTime}
-        />
-        <TextInput
+          onPress={() => setShowPicker("start")}
+        >
+          <Text>{formatTime(startTime)}</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
           style={styles.inputTime}
-          placeholder="конец"
-          value={endTime}
-          onChangeText={setEndTime}
-        />
+          onPress={() => setShowPicker("end")}
+        >
+          <Text>{formatTime(endTime)}</Text>
+        </TouchableOpacity>
       </View>
+
+      {showPicker && (
+        <DateTimePicker
+          value={new Date()}
+          mode="time"
+          is24Hour
+          display="default"
+          onChange={handleTimeChange}
+        />
+      )}
 
       <TextInput
         style={styles.searchInput}
@@ -80,24 +110,12 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
     borderRadius: 10,
     padding: 10,
-    textAlign: "center",
+    alignItems: "center",
   },
   searchInput: {
     backgroundColor: Colors.containerBackground,
     borderRadius: 10,
     padding: 10,
     marginBottom: 20,
-  },
-  scroll: {
-    maxHeight: 150,
-    marginBottom: 20,
-  },
-  clientItem: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#CCC",
-  },
-  selectedClient: {
-    backgroundColor: "#D0E8FF",
   },
 });
