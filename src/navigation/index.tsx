@@ -13,6 +13,7 @@ import CalendarScreen from "../screens/CalendarScreen";
 import ChatsScreen from "../screens/ChatsScreen";
 import ProfileScreen from "../screens/ProfileScreen";
 import TabBar from "../components/TabBar";
+import ClientsList from "../screens/ClientsList";
 
 const Tab = createBottomTabNavigator();
 
@@ -43,6 +44,11 @@ export default function Navigation() {
         <Tab.Screen
           name="Profile"
           component={ProfileScreen}
+          options={{ header: () => <Header /> }}
+        />
+        <Tab.Screen
+          name="ClientsList"
+          component={ClientsList}
           options={{ header: () => <Header /> }}
         />
       </Tab.Navigator>

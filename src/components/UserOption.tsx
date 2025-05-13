@@ -1,18 +1,19 @@
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Colors } from "../constants/colors";
 
 type Props = {
   iconName: any;
   title: string;
+  func: () => any;
 };
 
-export default function UserOption({ iconName, title }: Props) {
+export default function UserOption({ iconName, title, func }: Props) {
   return (
-    <View style={styles.main}>
+    <TouchableOpacity style={styles.main} onPress={func}>
       <MaterialIcons name={iconName} size={24} color={Colors.icon} />
       <Text style={{ fontSize: 20 }}>{title}</Text>
-    </View>
+    </TouchableOpacity>
   );
 }
 

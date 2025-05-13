@@ -6,11 +6,13 @@ import { useEffect, useState } from "react";
 import UserOption from "../components/UserOption";
 import * as ImagePicker from "expo-image-picker";
 
-export default function ProfileScreen() {
+export default function ProfileScreen({ navigation }: any) {
   const [avatarUri, setAvatarUri] = useState<string>("");
   const [editing, setEditing] = useState(false);
   const [inputText, setInputText] = useState("");
   const [username, setUsername] = useState("Ваше имя");
+
+  const isClient = true;
 
   useEffect(() => {
     (async () => {
@@ -88,8 +90,30 @@ export default function ProfileScreen() {
       </View>
 
       {/* user options */}
-      <UserOption iconName="person" title="Личные данные" />
-      <UserOption iconName="settings" title="Настройки" />
+      <UserOption
+        iconName="person"
+        title="Личные данные"
+        func={() => navigation.navigate("ClientsList")}
+      />
+      <UserOption
+        iconName="settings"
+        title="Настройки"
+        func={() => navigation.navigate("ClientsList")}
+      />
+      {isClient && (
+        <UserOption
+          iconName={"people"}
+          title="Список клиентов"
+          func={() => navigation.navigate("ClientsList")}
+        />
+      )}
+      {isClient && (
+        <UserOption
+          iconName={"history"}
+          title="История консультаций и заданий"
+          func={() => navigation.navigate("ClientsList")}
+        />
+      )}
     </ScrollView>
   );
 }
