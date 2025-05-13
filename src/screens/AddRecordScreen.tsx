@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { use, useState } from "react";
 import {
   View,
   Text,
@@ -24,6 +24,7 @@ export default function AddRecordScreen({
   const [startTime, setStartTime] = useState<Date | null>(null);
   const [endTime, setEndTime] = useState<Date | null>(null);
   const [showPicker, setShowPicker] = useState<"start" | "end" | null>(null);
+  const [consultationName, setConsultationName] = useState("");
   const [search, setSearch] = useState("");
 
   const handleTimeChange = (event: any, selectedTime?: Date) => {
@@ -41,20 +42,33 @@ export default function AddRecordScreen({
     <View style={styles.container}>
       <Text style={styles.date}>{selectedDate}</Text>
 
-      <View style={styles.timeContainer}>
-        <TouchableOpacity
-          style={styles.inputTime}
-          onPress={() => setShowPicker("start")}
-        >
-          <Text>{formatTime(startTime)}</Text>
-        </TouchableOpacity>
+      <TextInput
+        style={styles.searchInput}
+        placeholder="Название консультации"
+        value={consultationName}
+        onChangeText={setConsultationName}
+      />
 
-        <TouchableOpacity
-          style={styles.inputTime}
-          onPress={() => setShowPicker("end")}
-        >
-          <Text>{formatTime(endTime)}</Text>
-        </TouchableOpacity>
+      <View style={styles.timeContainer}>
+        <View style={{ width: "50%" }}>
+          <Text style={{ textAlign: "center", fontSize: 20 }}>Начало</Text>
+          <TouchableOpacity
+            style={styles.inputTime}
+            onPress={() => setShowPicker("start")}
+          >
+            <Text>{formatTime(startTime)}</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={{ width: "50%" }}>
+          <Text style={{ textAlign: "center", fontSize: 20 }}>Конец</Text>
+          <TouchableOpacity
+            style={styles.inputTime}
+            onPress={() => setShowPicker("end")}
+          >
+            <Text>{formatTime(endTime)}</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {showPicker && (
@@ -88,6 +102,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     backgroundColor: "#FFF",
+    gap: 20,
   },
   date: {
     fontSize: 20,
@@ -97,11 +112,11 @@ const styles = StyleSheet.create({
   timeContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 20,
+    height: 70,
   },
   inputTime: {
     flex: 1,
-    backgroundColor: Colors.lightPrimary,
+    backgroundColor: Colors.containerBackground,
     marginHorizontal: 5,
     borderRadius: 10,
     padding: 10,
@@ -111,6 +126,5 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.containerBackground,
     borderRadius: 10,
     padding: 10,
-    marginBottom: 20,
   },
 });
