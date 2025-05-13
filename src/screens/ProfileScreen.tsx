@@ -96,15 +96,14 @@ export default function ProfileScreen() {
 
 const styles = StyleSheet.create({
   mainContainer: {
-    backgroundColor: "#FFF",
+    backgroundColor: Colors.lightContainerBackground,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
   },
   userHeader: {
-    backgroundColor: Colors.containerBackground,
     alignItems: "center",
     gap: 20,
     paddingVertical: 20,
-    borderBottomLeftRadius: 15,
-    borderBottomRightRadius: 15,
     marginBottom: 28,
   },
   avatar: {

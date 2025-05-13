@@ -10,7 +10,7 @@ type Props = {
 export default function UserOption({ iconName, title }: Props) {
   return (
     <View style={styles.main}>
-      <MaterialIcons name={iconName} size={24} />
+      <MaterialIcons name={iconName} size={24} color={Colors.icon} />
       <Text style={{ fontSize: 20 }}>{title}</Text>
     </View>
   );
@@ -21,8 +21,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 10,
     paddingLeft: 15,
-    backgroundColor: Colors.lightContainerBackground,
+    backgroundColor: Colors.containerBackground,
     marginVertical: 12,
     paddingVertical: 12,
+    borderRadius: 20,
   },
 });
