@@ -1,13 +1,21 @@
 import { useEffect, useState } from "react";
-import { ScrollView, View, Text, StyleSheet } from "react-native";
+import {
+  ScrollView,
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+} from "react-native";
 import { Calendar, LocaleConfig } from "react-native-calendars";
 import { Colors } from "../constants/colors";
 import { format } from "date-fns";
 import { MaterialIcons } from "@expo/vector-icons";
+import Entypo from "@expo/vector-icons/Entypo";
 import { ru } from "date-fns/locale";
 import CustomButton from "../components/CustomButton";
 import AddRecordScreen from "./AddRecordScreen";
 import Task from "../components/Task";
+import ClientTask from "../components/ClientTask";
 
 LocaleConfig.locales["ru"] = {
   monthNames: [
@@ -57,6 +65,7 @@ export default function CalendarScreen() {
   const today = format(new Date(), "yyyy-MM-dd");
   const [selected, setSelected] = useState(today);
   const [isRecordActive, setRecordActive] = useState<boolean>(false);
+  const isClient = false;
 
   const handleAddRecord = () => {
     setRecordActive(true);
@@ -145,11 +154,34 @@ export default function CalendarScreen() {
                 {format(new Date(selected), "d MMMM", { locale: ru })}
               </Text>
             </View>
-            <CustomButton
-              title="Добавить запись"
-              backgroundColorProp={Colors.lightPrimary}
-              onClick={handleAddRecord}
-            />
+            {isClient ? (
+              <ScrollView style={{ marginTop: 12, maxHeight: 150 }}>
+                <ClientTask title="завершенное чела" complete={true} />
+                <ClientTask title="завершенное чела" complete={true} />
+                <ClientTask title="завершенное чела" complete={true} />
+                <ClientTask title="завершенное чела" complete={true} />
+                <ClientTask title="завершенное чела" complete={true} />
+                <ClientTask title="завершенное чела" complete={true} />
+                <ClientTask title="завершенное чела" complete={true} />
+              </ScrollView>
+            ) : (
+              <ScrollView style={{ marginTop: 12, maxHeight: 150 }}>
+                <Task
+                  title="Задание чела"
+                  complete={true}
+                  startTime={new Date()}
+                  endTime={new Date()}
+                />
+              </ScrollView>
+            )}
+
+            {!isClient && (
+              <CustomButton
+                title="Добавить запись"
+                backgroundColorProp={Colors.lightPrimary}
+                onClick={handleAddRecord}
+              />
+            )}
           </View>
         </View>
       )}
@@ -160,8 +192,12 @@ export default function CalendarScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFF",
+    backgroundColor: Colors.lightContainerBackground,
     justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
   },
   info: {
     marginTop: 20,
