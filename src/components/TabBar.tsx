@@ -49,7 +49,7 @@ const CustomTabBar = ({
   const containerStyle = useAnimatedStyle(() => {
     return {
       backgroundColor:
-        currentIndex.value === 2 ? Colors.containerBackground : "white",
+        currentIndex.value === 2 ? Colors.lightContainerBackground : "white",
     };
   });
 
