@@ -120,8 +120,9 @@ const styles = StyleSheet.create({
   chatItem: {
     paddingHorizontal: 16,
     paddingVertical: 20,
-    borderBottomColor: "#ddd",
-    borderBottomWidth: 1,
+    backgroundColor: "white",
+    borderRadius: 20,
+    marginBottom: 10,
   },
   chatName: {
     fontSize: 16,
