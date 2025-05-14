@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from "react-native";
+import { Colors } from "../constants/colors";
+import { MaterialIcons } from "@expo/vector-icons";
 
 const chatList = [
   { id: "1", name: "Психолог раз", lastMessage: "Здравствуйте!" },
@@ -49,32 +51,52 @@ const ChatSelection = ({ onSelectChat }: any) => (
   </View>
 );
 
-const ChatView = ({ chat, onBack }: any) => (
-  <View style={styles.container}>
-    <TouchableOpacity onPress={onBack} style={styles.backButton}>
-      <Text style={styles.backText}>{"<"} Назад</Text>
-    </TouchableOpacity>
-    <Text style={styles.chatHeader}>{chat.name}</Text>
-    <FlatList
-      data={messages}
-      keyExtractor={(item) => item.id}
-      contentContainerStyle={{ padding: 16 }}
-      renderItem={({ item }) => (
-        <View
-          style={[
-            styles.messageBubble,
-            item.fromUser ? styles.userMessage : styles.otherMessage,
-          ]}
-        >
-          <Text style={styles.messageText}>{item.text}</Text>
-        </View>
-      )}
-    />
-    <TextInput style={styles.messageInput} placeholder="Сообщение..." />
-  </View>
-);
+const ChatView = ({ chat, onBack }: any) => {
+  const [inputText, setInputText] = useState("");
 
-export default function ChatsScreen() {
+  const handleSend = () => {
+    if (inputText.trim() === "") return;
+
+    setInputText("");
+  };
+
+  return (
+    <View style={styles.container}>
+      <TouchableOpacity onPress={onBack} style={styles.backButton}>
+        <Text style={styles.backText}>{"<"} Назад</Text>
+      </TouchableOpacity>
+      <Text style={styles.chatHeader}>{chat.name}</Text>
+      <FlatList
+        data={messages}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={{ padding: 16 }}
+        renderItem={({ item }) => (
+          <View
+            style={[
+              styles.messageBubble,
+              item.fromUser ? styles.userMessage : styles.otherMessage,
+            ]}
+          >
+            <Text style={styles.messageText}>{item.text}</Text>
+          </View>
+        )}
+      />
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.messageInput}
+          placeholder="Сообщение..."
+          value={inputText}
+          onChangeText={setInputText}
+        />
+        <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
+          <MaterialIcons name="send" color={"white"} size={18} />
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+};
+
+export default function ChatScreen() {
   const [selectedChat, setSelectedChat] = useState(null);
 
   return selectedChat ? (
@@ -126,7 +148,7 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 16,
     marginBottom: 12,
-    // maxWidth: "80",
+    maxWidth: "80%",
   },
   otherMessage: {
     backgroundColor: "#d1d9ff",
@@ -139,10 +161,29 @@ const styles = StyleSheet.create({
   messageText: {
     fontSize: 16,
   },
-  messageInput: {
-    backgroundColor: "#fff",
-    padding: 12,
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
     margin: 12,
+    backgroundColor: "white",
     borderRadius: 12,
+    padding: 4,
+  },
+  messageInput: {
+    flex: 1,
+    padding: 12,
+  },
+  sendButton: {
+    marginLeft: 8,
+    backgroundColor: Colors.primary,
+    borderRadius: 999,
+    width: 35,
+    height: 35,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  sendButtonText: {
+    fontSize: 16,
+    color: "#fff",
   },
 });
