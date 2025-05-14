@@ -18,25 +18,37 @@ const clients = ["Иван", "Валерий", "Фёдор", "Леся", "Оль
 export default function App() {
   const [selectedClient, setSelectedClient] = useState<string | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleMorePress = (name: string) => {
     setSelectedClient(name);
     setModalVisible(true);
   };
 
+  const filteredClients = clients.filter((client) =>
+    searchQuery.trim() === ""
+      ? true
+      : client.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.header}>Клиенты</Text>
 
       <View style={styles.searchContainer}>
-        <TextInput placeholder="Поиск..." style={styles.searchInput} />
+        <TextInput
+          placeholder="Поиск..."
+          style={styles.searchInput}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
         <TouchableOpacity style={styles.addButton}>
           <Ionicons name="add" size={24} color="#555" />
         </TouchableOpacity>
       </View>
 
       <FlatList
-        data={clients}
+        data={filteredClients}
         keyExtractor={(item) => item}
         renderItem={({ item }) => (
           <ClientItem name={item} onMorePress={() => handleMorePress(item)} />
