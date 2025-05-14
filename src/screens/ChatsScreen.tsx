@@ -5,6 +5,8 @@ import {
   TextInput,
   FlatList,
   TouchableOpacity,
+  SafeAreaView,
+  KeyboardAvoidingView,
   StyleSheet,
 } from "react-native";
 import { Colors } from "../constants/colors";
@@ -14,11 +16,15 @@ const chatList = [
   { id: "1", name: "Психолог раз", lastMessage: "Здравствуйте!" },
   { id: "2", name: "Психолог два", lastMessage: "Как Ваше состояние?" },
   { id: "3", name: "Психолог три", lastMessage: "Начнём нашу первую сессию?" },
-  {
-    id: "4",
-    name: "Чат поддержки",
-    lastMessage: "Готовы помочь в любое время дня и ночи",
-  },
+  { id: "4", name: "Психолог три", lastMessage: "Начнём нашу первую сессию?" },
+  { id: "5", name: "Психолог три", lastMessage: "Начнём нашу первую сессию?" },
+  { id: "6", name: "Психолог три", lastMessage: "Начнём нашу первую сессию?" },
+  { id: "7", name: "Психолог три", lastMessage: "Начнём нашу первую сессию?" },
+  { id: "8", name: "Психолог три", lastMessage: "Начнём нашу первую сессию?" },
+  { id: "9", name: "Психолог три", lastMessage: "Начнём нашу первую сессию?" },
+  { id: "10", name: "Психолог три", lastMessage: "Начнём нашу первую сессию?" },
+  { id: "11", name: "Психолог три", lastMessage: "Начнём нашу первую сессию?" },
+  { id: "12", name: "Психолог три", lastMessage: "Начнём нашу первую сессию?" },
 ];
 
 const messages = [
@@ -33,11 +39,12 @@ const messages = [
 ];
 
 const ChatSelection = ({ onSelectChat }: any) => (
-  <View style={styles.container}>
+  <SafeAreaView style={styles.container}>
     <TextInput style={styles.searchInput} placeholder="Поиск..." />
     <FlatList
       data={chatList}
       keyExtractor={(item) => item.id}
+      contentContainerStyle={{ paddingBottom: 16 }}
       renderItem={({ item }) => (
         <TouchableOpacity
           style={styles.chatItem}
@@ -48,7 +55,7 @@ const ChatSelection = ({ onSelectChat }: any) => (
         </TouchableOpacity>
       )}
     />
-  </View>
+  </SafeAreaView>
 );
 
 const ChatView = ({ chat, onBack }: any) => {
@@ -56,43 +63,44 @@ const ChatView = ({ chat, onBack }: any) => {
 
   const handleSend = () => {
     if (inputText.trim() === "") return;
-
     setInputText("");
   };
 
   return (
-    <View style={styles.container}>
-      <TouchableOpacity onPress={onBack} style={styles.backButton}>
-        <Text style={styles.backText}>{"<"} Назад</Text>
-      </TouchableOpacity>
-      <Text style={styles.chatHeader}>{chat.name}</Text>
-      <FlatList
-        data={messages}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={{ padding: 16 }}
-        renderItem={({ item }) => (
-          <View
-            style={[
-              styles.messageBubble,
-              item.fromUser ? styles.userMessage : styles.otherMessage,
-            ]}
-          >
-            <Text style={styles.messageText}>{item.text}</Text>
-          </View>
-        )}
-      />
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.messageInput}
-          placeholder="Сообщение..."
-          value={inputText}
-          onChangeText={setInputText}
-        />
-        <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
-          <MaterialIcons name="send" color={"white"} size={18} />
+    <KeyboardAvoidingView style={styles.container}>
+      <SafeAreaView style={{ flex: 1 }}>
+        <TouchableOpacity onPress={onBack} style={styles.backButton}>
+          <Text style={styles.backText}>{"<"} Назад</Text>
         </TouchableOpacity>
-      </View>
-    </View>
+        <Text style={styles.chatHeader}>{chat.name}</Text>
+        <FlatList
+          data={messages}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={{ padding: 16, paddingBottom: 80 }}
+          renderItem={({ item }) => (
+            <View
+              style={[
+                styles.messageBubble,
+                item.fromUser ? styles.userMessage : styles.otherMessage,
+              ]}
+            >
+              <Text style={styles.messageText}>{item.text}</Text>
+            </View>
+          )}
+        />
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.messageInput}
+            placeholder="Сообщение..."
+            value={inputText}
+            onChangeText={setInputText}
+          />
+          <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
+            <MaterialIcons name="send" color={"white"} size={18} />
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -109,7 +117,7 @@ export default function ChatScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#eef1ff",
+    backgroundColor: Colors.lightContainerBackground,
   },
   searchInput: {
     backgroundColor: "#fff",
