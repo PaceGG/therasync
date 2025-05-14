@@ -46,11 +46,6 @@ export default function Navigation() {
           component={ProfileScreen}
           options={{ header: () => <Header /> }}
         />
-        <Tab.Screen
-          name="ClientsList"
-          component={ClientsList}
-          options={{ header: () => <Header /> }}
-        />
       </Tab.Navigator>
     </NavigationContainer>
   );

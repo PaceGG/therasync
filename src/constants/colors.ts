@@ -3,5 +3,6 @@ export const Colors = {
   lightPrimary: "#B8C1FE",
   containerBackground: "#CDDEFC",
   lightContainerBackground: "#E5ECFE",
+  tabBarBackground: "#D0D8FF",
   icon: "#5678c1",
 };
