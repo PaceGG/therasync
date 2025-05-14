@@ -6,6 +6,8 @@ import Animated, {
   withTiming,
   useAnimatedStyle,
   interpolateColor,
+  useDerivedValue,
+  useAnimatedProps,
 } from "react-native-reanimated";
 import { MaterialIcons } from "@expo/vector-icons";
 
@@ -61,15 +63,6 @@ const CustomTabBar = ({
         {state.routes.map((route, index) => {
           const focused = state.index === index;
 
-          const animatedIconStyle = useAnimatedStyle(() => {
-            const color = interpolateColor(
-              currentIndex.value,
-              [index - 1, index, index + 1],
-              [Colors.icon, "white", Colors.icon]
-            );
-            return { color };
-          });
-
           return (
             <TouchableOpacity
               key={index}
@@ -80,7 +73,7 @@ const CustomTabBar = ({
               <AnimatedIcon
                 name={icons[index] as any}
                 size={26}
-                style={animatedIconStyle}
+                color={state.index === index ? "white" : Colors.icon}
               />
             </TouchableOpacity>
           );
@@ -94,7 +87,7 @@ const styles = StyleSheet.create({
   tabBar: {
     flexDirection: "row",
     height: 70,
-    backgroundColor: Colors.lightContainerBackground,
+    backgroundColor: Colors.tabBarBackground,
     position: "relative",
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,

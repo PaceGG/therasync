@@ -90,7 +90,7 @@ export default function AddRecordScreen({
 
       <CustomButton
         title="Сохранить"
-        backgroundColorProp={"#C8FACC"}
+        backgroundColorProp={Colors.lightPrimary}
         onClick={confirmAddRecord}
       />
     </View>
