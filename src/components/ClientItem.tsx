@@ -21,7 +21,7 @@ export default function ClientItem({ name, onMorePress }: ClientItemProps) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#dce7ff",
+    backgroundColor: "white",
     borderRadius: 12,
     padding: 16,
     marginVertical: 6,
