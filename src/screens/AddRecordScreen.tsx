@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { use, useState } from "react";
 import {
   View,
   Text,
@@ -6,17 +6,15 @@ import {
   StyleSheet,
   TouchableOpacity,
   Platform,
-  Alert,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import CustomButton from "../components/CustomButton";
 import { Colors } from "../constants/colors";
 import formatTime from "../utils/utilFunctions";
-import { createAppointment } from "../services/appointment";
 
 type Props = {
-  selectedDate: string; // формат: '2025-05-18'
-  confirmAddRecord: () => void;
+  selectedDate: any;
+  confirmAddRecord: any;
 };
 
 export default function AddRecordScreen({
@@ -27,39 +25,16 @@ export default function AddRecordScreen({
   const [endTime, setEndTime] = useState<Date | null>(null);
   const [showPicker, setShowPicker] = useState<"start" | "end" | null>(null);
   const [consultationName, setConsultationName] = useState("");
-  const [search, setSearch] = useState<string>(""); // клиент
+  const [search, setSearch] = useState("");
 
   const handleTimeChange = (event: any, selectedTime?: Date) => {
     if (Platform.OS !== "ios") setShowPicker(null);
     if (!selectedTime) return;
+
     if (showPicker === "start") {
       setStartTime(selectedTime);
     } else if (showPicker === "end") {
       setEndTime(selectedTime);
-    }
-  };
-
-  const handleSaveRecord = async () => {
-    if (!startTime || !endTime || !search) {
-      Alert.alert("Ошибка", "Пожалуйста, заполните все поля");
-      return;
-    }
-
-    try {
-      const appointment = {
-        date: selectedDate,
-        startTime: startTime.toTimeString().substring(0, 5), // 'HH:mm'
-        endTime: endTime.toTimeString().substring(0, 5), // 'HH:mm'
-        psychologistId: 1,
-        clientId: Number(search),
-      };
-
-      await createAppointment(appointment);
-      Alert.alert("Успех", "Запись добавлена");
-      confirmAddRecord();
-    } catch (error) {
-      Alert.alert("Ошибка", "Не удалось сохранить запись");
-      console.error("Ошибка при создании записи:", error);
     }
   };
 
@@ -108,7 +83,7 @@ export default function AddRecordScreen({
 
       <TextInput
         style={styles.searchInput}
-        placeholder="Введите ID клиента"
+        placeholder="Введите имя клиента"
         value={search}
         onChangeText={setSearch}
       />
@@ -116,7 +91,7 @@ export default function AddRecordScreen({
       <CustomButton
         title="Сохранить"
         backgroundColorProp={Colors.lightPrimary}
-        onClick={handleSaveRecord}
+        onClick={confirmAddRecord}
       />
     </View>
   );

@@ -14,8 +14,6 @@
     "@react-navigation/bottom-tabs": "^7.3.11",
     "@react-navigation/native": "^7.1.7",
     "@react-navigation/native-stack": "^7.3.11",
-    "axios": "^1.9.0",
-    "axios-mock-adapter": "^2.1.0",
     "date-fns": "^4.1.0",
     "expo": "~53.0.6",
     "expo-font": "^13.3.1",
@@ -36,13 +34,7 @@
   "devDependencies": {
     "@babel/core": "^7.25.2",
     "@types/react": "~19.0.10",
-    "msw": "^2.8.3",
     "typescript": "~5.8.3"
   },
-  "private": true,
-  "msw": {
-    "workerDirectory": [
-      "public"
-    ]
-  }
+  "private": true
 }
