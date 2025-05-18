@@ -12,7 +12,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import CustomButton from "../components/CustomButton";
 import { Colors } from "../constants/colors";
 import formatTime from "../utils/utilFunctions";
-import { createAppointment } from "../services/appointments";
+import { createAppointment } from "../services/appointment";
 
 type Props = {
   selectedDate: string; // формат: '2025-05-18'
@@ -27,7 +27,7 @@ export default function AddRecordScreen({
   const [endTime, setEndTime] = useState<Date | null>(null);
   const [showPicker, setShowPicker] = useState<"start" | "end" | null>(null);
   const [consultationName, setConsultationName] = useState("");
-  const [search, setSearch] = useState(""); // клиент
+  const [search, setSearch] = useState<string>(""); // клиент
 
   const handleTimeChange = (event: any, selectedTime?: Date) => {
     if (Platform.OS !== "ios") setShowPicker(null);
@@ -40,7 +40,7 @@ export default function AddRecordScreen({
   };
 
   const handleSaveRecord = async () => {
-    if (!startTime || !endTime || !search.trim()) {
+    if (!startTime || !endTime || !search) {
       Alert.alert("Ошибка", "Пожалуйста, заполните все поля");
       return;
     }
@@ -50,13 +50,13 @@ export default function AddRecordScreen({
         date: selectedDate,
         startTime: startTime.toTimeString().substring(0, 5), // 'HH:mm'
         endTime: endTime.toTimeString().substring(0, 5), // 'HH:mm'
-        psychologistId: "1", // TODO: заменить на текущего пользователя
-        clientId: search.trim(), // пока используем как ID или имя, зависит от API
+        psychologistId: 1,
+        clientId: Number(search),
       };
 
       await createAppointment(appointment);
       Alert.alert("Успех", "Запись добавлена");
-      confirmAddRecord(); // переход назад или обновление экрана
+      confirmAddRecord();
     } catch (error) {
       Alert.alert("Ошибка", "Не удалось сохранить запись");
       console.error("Ошибка при создании записи:", error);
