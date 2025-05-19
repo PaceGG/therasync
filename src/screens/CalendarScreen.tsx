@@ -100,9 +100,9 @@ export default function CalendarScreen() {
     setRecordActive(false);
   };
 
-  const appointmentsForSelectedDate = appointments.filter(
-    (appointment) => appointment.date === selected
-  );
+  const appointmentsForSelectedDate = appointments
+    .filter((appointment) => appointment.date === selected)
+    .sort((a, b) => a.startTime.localeCompare(b.startTime));
 
   return (
     <>
