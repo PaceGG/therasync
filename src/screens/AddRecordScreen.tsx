@@ -8,6 +8,7 @@ import {
   Platform,
   Alert,
   ImageBackground,
+  ToastAndroid,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import CustomButton from "../components/CustomButton";
@@ -55,7 +56,7 @@ export default function AddRecordScreen({
       };
 
       await createAppointment(appointment);
-      Alert.alert("Успех", "Запись добавлена");
+      ToastAndroid.show("Запись добавлена", ToastAndroid.SHORT);
       confirmAddRecord();
     } catch (error) {
       Alert.alert("Ошибка", "Не удалось сохранить запись");
