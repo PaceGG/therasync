@@ -78,11 +78,14 @@ export default function AddRecordScreen({
     try {
       const allAppointments = await getPsychologistAppointments();
       const todays = allAppointments.filter((app) => app.date === selectedDate);
-      const hasConflict = todays.some((app) =>
+      const conflict = todays.find((app) =>
         checkOverlap(newStart, newEnd, app.startTime, app.endTime)
       );
-      if (hasConflict) {
-        Alert.alert("Ошибка", "На выбранный интервал уже есть запись");
+      if (conflict) {
+        Alert.alert(
+          "Ошибка",
+          `На выбранный интервал уже есть запись: с ${conflict.startTime} до ${conflict.endTime}`
+        );
         return;
       }
 

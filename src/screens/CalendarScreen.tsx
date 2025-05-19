@@ -83,8 +83,6 @@ export default function CalendarScreen() {
     } catch (error) {
       console.error("Ошибка при получении записей:", error);
     }
-
-    console.log(appointments);
   };
 
   useEffect(() => {
