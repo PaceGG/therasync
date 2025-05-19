@@ -27,7 +27,6 @@ export default function AddRecordScreen({
   const [startTime, setStartTime] = useState<Date | null>(null);
   const [endTime, setEndTime] = useState<Date | null>(null);
   const [showPicker, setShowPicker] = useState<"start" | "end" | null>(null);
-  const [consultationName, setConsultationName] = useState("");
   const [search, setSearch] = useState<string>(""); // клиент
 
   const handleTimeChange = (event: any, selectedTime?: Date) => {
@@ -66,13 +65,6 @@ export default function AddRecordScreen({
   return (
     <View style={styles.container}>
       <Text style={styles.date}>{format(selectedDate, "dd MMMM yyyy")}</Text>
-
-      <TextInput
-        style={styles.searchInput}
-        placeholder="Название консультации"
-        value={consultationName}
-        onChangeText={setConsultationName}
-      />
 
       <View style={styles.timeContainer}>
         <View style={{ width: "50%" }}>
