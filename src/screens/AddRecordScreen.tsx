@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   Alert,
   ImageBackground,
   ToastAndroid,
+  BackHandler,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import CustomButton from "../components/CustomButton";
@@ -19,21 +20,37 @@ import {
   getPsychologistAppointments,
 } from "../services/appointment";
 import { format } from "date-fns";
-import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
+import { MaterialIcons } from "@expo/vector-icons";
 
 type Props = {
   selectedDate: string; // формат: '2025-05-18'
   confirmAddRecord: () => void;
+  cancelAddRecord: () => void;
 };
 
 export default function AddRecordScreen({
   selectedDate,
   confirmAddRecord,
+  cancelAddRecord,
 }: Props) {
   const [startTime, setStartTime] = useState<Date | null>(null);
   const [endTime, setEndTime] = useState<Date | null>(null);
   const [showPicker, setShowPicker] = useState<"start" | "end" | null>(null);
   const [search, setSearch] = useState<string>(""); // клиент ID
+
+  useEffect(() => {
+    const backAction = () => {
+      cancelAddRecord();
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    return () => backHandler.remove();
+  }, []);
 
   const handleTimeChange = (event: any, selectedTime?: Date) => {
     if (Platform.OS !== "ios") setShowPicker(null);
@@ -111,6 +128,13 @@ export default function AddRecordScreen({
       source={require("../assets/background.png")}
       resizeMode="cover"
     >
+      <TouchableOpacity
+        style={styles.backButton}
+        onPress={() => cancelAddRecord()}
+      >
+        <MaterialIcons name="arrow-back" size={24} color={Colors.icon} />
+      </TouchableOpacity>
+
       <Text style={styles.date}>
         {format(new Date(selectedDate), "dd MMMM yyyy")}
       </Text>
@@ -164,6 +188,12 @@ export default function AddRecordScreen({
 }
 
 const styles = StyleSheet.create({
+  backButton: {
+    position: "absolute",
+    top: -55,
+    left: 25,
+    zIndex: 300,
+  },
   container: {
     flex: 1,
     padding: 20,

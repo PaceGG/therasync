@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import { Calendar, LocaleConfig } from "react-native-calendars";
 import { Colors } from "../constants/colors";
-import { format } from "date-fns";
+import { format, set } from "date-fns";
 import { MaterialIcons } from "@expo/vector-icons";
 import Entypo from "@expo/vector-icons/Entypo";
 import { ru } from "date-fns/locale";
@@ -98,6 +98,10 @@ export default function CalendarScreen() {
     setRecordActive(false);
   };
 
+  const cancelAddRecord = () => {
+    setRecordActive(false);
+  };
+
   const appointmentsForSelectedDate = appointments
     .filter((appointment) => appointment.date === selected)
     .sort((a, b) => a.startTime.localeCompare(b.startTime));
@@ -110,6 +114,7 @@ export default function CalendarScreen() {
             locale: ru,
           })}
           confirmAddRecord={confirmAddRecord}
+          cancelAddRecord={cancelAddRecord}
         />
       ) : (
         <View style={styles.container}>
