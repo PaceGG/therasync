@@ -14,8 +14,12 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import CustomButton from "../components/CustomButton";
 import { Colors } from "../constants/colors";
 import formatTime from "../utils/utilFunctions";
-import { createAppointment } from "../services/appointment";
+import {
+  createAppointment,
+  getPsychologistAppointments,
+} from "../services/appointment";
 import { format } from "date-fns";
+import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
 
 type Props = {
   selectedDate: string; // формат: '2025-05-18'
@@ -29,7 +33,7 @@ export default function AddRecordScreen({
   const [startTime, setStartTime] = useState<Date | null>(null);
   const [endTime, setEndTime] = useState<Date | null>(null);
   const [showPicker, setShowPicker] = useState<"start" | "end" | null>(null);
-  const [search, setSearch] = useState<string>(""); // клиент
+  const [search, setSearch] = useState<string>(""); // клиент ID
 
   const handleTimeChange = (event: any, selectedTime?: Date) => {
     if (Platform.OS !== "ios") setShowPicker(null);
@@ -41,17 +45,51 @@ export default function AddRecordScreen({
     }
   };
 
+  const checkOverlap = (
+    newStart: Date,
+    newEnd: Date,
+    existingStart: string,
+    existingEnd: string
+  ) => {
+    const exStart = new Date(`${selectedDate}T${existingStart}:00`);
+    const exEnd = new Date(`${selectedDate}T${existingEnd}:00`);
+    return newStart < exEnd && newEnd > exStart;
+  };
+
   const handleSaveRecord = async () => {
     if (!startTime || !endTime || !search) {
       Alert.alert("Ошибка", "Пожалуйста, заполните все поля");
       return;
     }
 
+    // Проверка на корректный интервал
+    const newStart = new Date(
+      `${selectedDate}T${startTime.toTimeString().substring(0, 5)}:00`
+    );
+    const newEnd = new Date(
+      `${selectedDate}T${endTime.toTimeString().substring(0, 5)}:00`
+    );
+    if (newEnd <= newStart) {
+      Alert.alert("Ошибка", "Время окончания должно быть позже времени начала");
+      return;
+    }
+
+    // Проверка на пересечение времени
     try {
+      const allAppointments = await getPsychologistAppointments();
+      const todays = allAppointments.filter((app) => app.date === selectedDate);
+      const hasConflict = todays.some((app) =>
+        checkOverlap(newStart, newEnd, app.startTime, app.endTime)
+      );
+      if (hasConflict) {
+        Alert.alert("Ошибка", "На выбранный интервал уже есть запись");
+        return;
+      }
+
       const appointment = {
         date: selectedDate,
-        startTime: startTime.toTimeString().substring(0, 5), // 'HH:mm'
-        endTime: endTime.toTimeString().substring(0, 5), // 'HH:mm'
+        startTime: newStart.toTimeString().substring(0, 5),
+        endTime: newEnd.toTimeString().substring(0, 5),
         clientId: Number(search),
       };
 
@@ -70,7 +108,9 @@ export default function AddRecordScreen({
       source={require("../assets/background.png")}
       resizeMode="cover"
     >
-      <Text style={styles.date}>{format(selectedDate, "dd MMMM yyyy")}</Text>
+      <Text style={styles.date}>
+        {format(new Date(selectedDate), "dd MMMM yyyy")}
+      </Text>
 
       <View style={styles.timeContainer}>
         <View style={{ width: "50%" }}>
