@@ -1,6 +1,4 @@
-import { Appointment as AppointmentData } from "../types";
-
-type Appointment = AppointmentData & { id: number };
+import { AppointmentData, Appointment } from "../types";
 
 const mockAppointments: Appointment[] = [
   {
@@ -41,12 +39,10 @@ export const updateAppointment = async (
   return mockAppointments[index];
 };
 
-export const getAppointmentsByPsychologist = async (): Promise<
-  Appointment[]
-> => {
+export const getPsychologistAppointments = async (): Promise<Appointment[]> => {
   return mockAppointments;
 };
 
-export const getAppointmentsByClient = async (): Promise<Appointment[]> => {
+export const getClientAppointments = async (): Promise<Appointment[]> => {
   return mockAppointments;
 };

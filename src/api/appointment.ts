@@ -1,7 +1,7 @@
 import { api, getAuthHeaders } from "./index";
-import { Appointment } from "../types/appointment";
+import { AppointmentData } from "../types/appointment";
 
-export const createAppointment = async (data: Appointment) => {
+export const createAppointment = async (data: AppointmentData) => {
   try {
     const headers = await getAuthHeaders();
 
@@ -14,7 +14,7 @@ export const createAppointment = async (data: Appointment) => {
 
 export const updateAppointment = async (
   id: number,
-  data: Partial<Appointment>
+  data: Partial<AppointmentData>
 ) => {
   try {
     const headers = await getAuthHeaders();

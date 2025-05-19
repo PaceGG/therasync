@@ -13,6 +13,7 @@ import CustomButton from "../components/CustomButton";
 import { Colors } from "../constants/colors";
 import formatTime from "../utils/utilFunctions";
 import { createAppointment } from "../services/appointment";
+import { format } from "date-fns";
 
 type Props = {
   selectedDate: string; // формат: '2025-05-18'
@@ -50,7 +51,6 @@ export default function AddRecordScreen({
         date: selectedDate,
         startTime: startTime.toTimeString().substring(0, 5), // 'HH:mm'
         endTime: endTime.toTimeString().substring(0, 5), // 'HH:mm'
-        psychologistId: 1,
         clientId: Number(search),
       };
 
@@ -65,7 +65,7 @@ export default function AddRecordScreen({
 
   return (
     <View style={styles.container}>
-      <Text style={styles.date}>{selectedDate}</Text>
+      <Text style={styles.date}>{format(selectedDate, "dd MMMM yyyy")}</Text>
 
       <TextInput
         style={styles.searchInput}

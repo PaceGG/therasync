@@ -17,6 +17,12 @@ import AddRecordScreen from "./AddRecordScreen";
 import Task from "../components/Task";
 import ClientTask from "../components/ClientTask";
 
+import {
+  getClientAppointments,
+  getPsychologistAppointments,
+} from "../services/appointment";
+import { Appointment } from "../types";
+
 LocaleConfig.locales["ru"] = {
   monthNames: [
     "Январь",
@@ -64,22 +70,45 @@ LocaleConfig.defaultLocale = "ru";
 export default function CalendarScreen() {
   const today = format(new Date(), "yyyy-MM-dd");
   const [selected, setSelected] = useState(today);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [isRecordActive, setRecordActive] = useState<boolean>(false);
   const isClient = false;
+
+  const fetchAppointments = async () => {
+    try {
+      const data = isClient
+        ? await getClientAppointments()
+        : await getPsychologistAppointments();
+      setAppointments(data);
+    } catch (error) {
+      console.error("Ошибка при получении записей:", error);
+    }
+
+    console.log(appointments);
+  };
+
+  useEffect(() => {
+    fetchAppointments();
+  });
 
   const handleAddRecord = () => {
     setRecordActive(true);
   };
 
   const confirmAddRecord = () => {
+    fetchAppointments();
     setRecordActive(false);
   };
+
+  const appointmentsForSelectedDate = appointments.filter(
+    (appointment) => appointment.date === selected
+  );
 
   return (
     <>
       {isRecordActive ? (
         <AddRecordScreen
-          selectedDate={format(new Date(selected), "d MMMM yyyy", {
+          selectedDate={format(new Date(selected), "yyyy-MM-dd", {
             locale: ru,
           })}
           confirmAddRecord={confirmAddRecord}
@@ -154,26 +183,31 @@ export default function CalendarScreen() {
                 {format(new Date(selected), "d MMMM", { locale: ru })}
               </Text>
             </View>
-            {isClient ? (
-              <ScrollView style={{ marginTop: 12, maxHeight: 150 }}>
-                <ClientTask title="завершенное чела" complete={true} />
-                <ClientTask title="завершенное чела" complete={true} />
-                <ClientTask title="завершенное чела" complete={true} />
-                <ClientTask title="завершенное чела" complete={true} />
-                <ClientTask title="завершенное чела" complete={true} />
-                <ClientTask title="завершенное чела" complete={true} />
-                <ClientTask title="завершенное чела" complete={true} />
-              </ScrollView>
-            ) : (
-              <ScrollView style={{ marginTop: 12, maxHeight: 150 }}>
-                <Task
-                  title="Задание чела"
-                  complete={true}
-                  startTime={new Date()}
-                  endTime={new Date()}
-                />
-              </ScrollView>
-            )}
+            <ScrollView style={{ marginTop: 12, maxHeight: 150 }}>
+              {appointmentsForSelectedDate.length > 0 ? (
+                appointmentsForSelectedDate.map((appt) =>
+                  isClient ? (
+                    <ClientTask
+                      key={appt.id}
+                      title={`Запись в ${appt.startTime}`}
+                      complete={true}
+                    />
+                  ) : (
+                    <Task
+                      key={appt.id}
+                      title={`С клиентом #${appt.clientId}`}
+                      complete={true}
+                      startTime={new Date(`${appt.date}T${appt.startTime}`)}
+                      endTime={new Date(`${appt.date}T${appt.endTime}`)}
+                    />
+                  )
+                )
+              ) : (
+                <Text style={{ textAlign: "center", marginTop: 10 }}>
+                  Нет записей на выбранную дату
+                </Text>
+              )}
+            </ScrollView>
 
             {!isClient && (
               <CustomButton
