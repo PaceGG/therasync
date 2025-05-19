@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Platform,
   Alert,
+  ImageBackground,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import CustomButton from "../components/CustomButton";
@@ -63,7 +64,11 @@ export default function AddRecordScreen({
   };
 
   return (
-    <View style={styles.container}>
+    <ImageBackground
+      style={styles.container}
+      source={require("../assets/background.png")}
+      resizeMode="cover"
+    >
       <Text style={styles.date}>{format(selectedDate, "dd MMMM yyyy")}</Text>
 
       <View style={styles.timeContainer}>
@@ -107,10 +112,10 @@ export default function AddRecordScreen({
 
       <CustomButton
         title="Сохранить"
-        backgroundColorProp={Colors.lightPrimary}
+        backgroundColorProp={"white"}
         onClick={handleSaveRecord}
       />
-    </View>
+    </ImageBackground>
   );
 }
 
@@ -132,14 +137,14 @@ const styles = StyleSheet.create({
   },
   inputTime: {
     flex: 1,
-    backgroundColor: Colors.containerBackground,
+    backgroundColor: "white",
     marginHorizontal: 5,
     borderRadius: 10,
     padding: 10,
     alignItems: "center",
   },
   searchInput: {
-    backgroundColor: Colors.containerBackground,
+    backgroundColor: "white",
     borderRadius: 10,
     padding: 10,
   },
