@@ -14,7 +14,24 @@ export default function App() {
         setToken(storedToken);
       }
     });
-  }, []);
+  }, [token]);
 
-  return <>{!token ? <YandexAuthScreen /> : <Navigation />}</>;
+  const setMainToken = (token: string) => {
+    setToken(token);
+  };
+
+  const logout = () => {
+    AsyncStorage.removeItem(TOKEN_KEY);
+    setToken(null);
+  };
+
+  return (
+    <>
+      {!token ? (
+        <YandexAuthScreen setMainToken={setMainToken} />
+      ) : (
+        <Navigation logout={logout} />
+      )}
+    </>
+  );
 }

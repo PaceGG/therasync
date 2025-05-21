@@ -11,7 +11,11 @@ const discovery = {
 
 const clientId = "7f8716ae1c5349cd86942c81c036d5a5";
 
-export default function AuthScreen() {
+type Props = {
+  setMainToken: (token: string) => void;
+};
+
+export default function AuthScreen({ setMainToken }: Props) {
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -57,6 +61,7 @@ export default function AuthScreen() {
           const accessToken = res.accessToken;
           setToken(accessToken);
           AsyncStorage.setItem(TOKEN_KEY, accessToken);
+          setMainToken(accessToken);
         })
         .catch((err) => {
           console.error("Ошибка получения токена:", err);
@@ -74,15 +79,11 @@ export default function AuthScreen() {
 
   return (
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      {!token ? (
-        <Button
-          disabled={!request}
-          title="Войти через Яндекс"
-          onPress={() => promptAsync({ useProxy: true } as any)}
-        />
-      ) : (
-        <Text>Вы вошли! Токен: {token}</Text>
-      )}
+      <Button
+        disabled={!request}
+        title="Войти через Яндекс"
+        onPress={() => promptAsync({ useProxy: true } as any)}
+      />
     </View>
   );
 }
