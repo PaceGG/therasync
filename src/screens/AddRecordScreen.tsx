@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -7,27 +7,50 @@ import {
   TouchableOpacity,
   Platform,
   Alert,
+  ImageBackground,
+  ToastAndroid,
+  BackHandler,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import CustomButton from "../components/CustomButton";
 import { Colors } from "../constants/colors";
 import formatTime from "../utils/utilFunctions";
-import { createAppointment } from "../services/appointment";
+import {
+  createAppointment,
+  getPsychologistAppointments,
+} from "../services/appointment";
+import { format } from "date-fns";
+import { MaterialIcons } from "@expo/vector-icons";
 
 type Props = {
   selectedDate: string; // формат: '2025-05-18'
   confirmAddRecord: () => void;
+  cancelAddRecord: () => void;
 };
 
 export default function AddRecordScreen({
   selectedDate,
   confirmAddRecord,
+  cancelAddRecord,
 }: Props) {
   const [startTime, setStartTime] = useState<Date | null>(null);
   const [endTime, setEndTime] = useState<Date | null>(null);
   const [showPicker, setShowPicker] = useState<"start" | "end" | null>(null);
-  const [consultationName, setConsultationName] = useState("");
-  const [search, setSearch] = useState<string>(""); // клиент
+  const [search, setSearch] = useState<string>(""); // клиент ID
+
+  useEffect(() => {
+    const backAction = () => {
+      cancelAddRecord();
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    return () => backHandler.remove();
+  }, []);
 
   const handleTimeChange = (event: any, selectedTime?: Date) => {
     if (Platform.OS !== "ios") setShowPicker(null);
@@ -39,23 +62,59 @@ export default function AddRecordScreen({
     }
   };
 
+  const checkOverlap = (
+    newStart: Date,
+    newEnd: Date,
+    existingStart: string,
+    existingEnd: string
+  ) => {
+    const exStart = new Date(`${selectedDate}T${existingStart}:00`);
+    const exEnd = new Date(`${selectedDate}T${existingEnd}:00`);
+    return newStart < exEnd && newEnd > exStart;
+  };
+
   const handleSaveRecord = async () => {
     if (!startTime || !endTime || !search) {
       Alert.alert("Ошибка", "Пожалуйста, заполните все поля");
       return;
     }
 
+    // Проверка на корректный интервал
+    const newStart = new Date(
+      `${selectedDate}T${startTime.toTimeString().substring(0, 5)}:00`
+    );
+    const newEnd = new Date(
+      `${selectedDate}T${endTime.toTimeString().substring(0, 5)}:00`
+    );
+    if (newEnd <= newStart) {
+      Alert.alert("Ошибка", "Время окончания должно быть позже времени начала");
+      return;
+    }
+
+    // Проверка на пересечение времени
     try {
+      const allAppointments = await getPsychologistAppointments();
+      const todays = allAppointments.filter((app) => app.date === selectedDate);
+      const conflict = todays.find((app) =>
+        checkOverlap(newStart, newEnd, app.startTime, app.endTime)
+      );
+      if (conflict) {
+        Alert.alert(
+          "Ошибка",
+          `На выбранный интервал уже есть запись: с ${conflict.startTime} до ${conflict.endTime}`
+        );
+        return;
+      }
+
       const appointment = {
         date: selectedDate,
-        startTime: startTime.toTimeString().substring(0, 5), // 'HH:mm'
-        endTime: endTime.toTimeString().substring(0, 5), // 'HH:mm'
-        psychologistId: 1,
+        startTime: newStart.toTimeString().substring(0, 5),
+        endTime: newEnd.toTimeString().substring(0, 5),
         clientId: Number(search),
       };
 
       await createAppointment(appointment);
-      Alert.alert("Успех", "Запись добавлена");
+      ToastAndroid.show("Запись добавлена", ToastAndroid.SHORT);
       confirmAddRecord();
     } catch (error) {
       Alert.alert("Ошибка", "Не удалось сохранить запись");
@@ -64,15 +123,21 @@ export default function AddRecordScreen({
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.date}>{selectedDate}</Text>
+    <ImageBackground
+      style={styles.container}
+      source={require("../assets/background.png")}
+      resizeMode="cover"
+    >
+      <TouchableOpacity
+        style={styles.backButton}
+        onPress={() => cancelAddRecord()}
+      >
+        <MaterialIcons name="arrow-back" size={24} color={Colors.icon} />
+      </TouchableOpacity>
 
-      <TextInput
-        style={styles.searchInput}
-        placeholder="Название консультации"
-        value={consultationName}
-        onChangeText={setConsultationName}
-      />
+      <Text style={styles.date}>
+        {format(new Date(selectedDate), "dd MMMM yyyy")}
+      </Text>
 
       <View style={styles.timeContainer}>
         <View style={{ width: "50%" }}>
@@ -115,14 +180,20 @@ export default function AddRecordScreen({
 
       <CustomButton
         title="Сохранить"
-        backgroundColorProp={Colors.lightPrimary}
+        backgroundColorProp={"white"}
         onClick={handleSaveRecord}
       />
-    </View>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
+  backButton: {
+    position: "absolute",
+    top: -55,
+    left: 25,
+    zIndex: 300,
+  },
   container: {
     flex: 1,
     padding: 20,
@@ -140,14 +211,14 @@ const styles = StyleSheet.create({
   },
   inputTime: {
     flex: 1,
-    backgroundColor: Colors.containerBackground,
+    backgroundColor: "white",
     marginHorizontal: 5,
     borderRadius: 10,
     padding: 10,
     alignItems: "center",
   },
   searchInput: {
-    backgroundColor: Colors.containerBackground,
+    backgroundColor: "white",
     borderRadius: 10,
     padding: 10,
   },

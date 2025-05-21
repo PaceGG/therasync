@@ -1,7 +1,7 @@
 import { ChatRoom, Message } from "../types/chat";
 import { User } from "../types/auth";
 import { Client } from "../types/client";
-import { Appointment } from "../types/appointment";
+import { AppointmentData } from "../types/appointment";
 import { Task } from "../types/task";
 
 export const mockChatRooms: ChatRoom[] = [
@@ -34,18 +34,6 @@ export const mockClients: Client[] = [
     id: 1,
     firstName: "Анна",
     lastName: "Иванова",
-  },
-];
-
-export const mockAppointments: Appointment[] = [
-  {
-    id: 1,
-    date: "2025-05-20",
-    startTime: "10:00",
-    endTime: "11:00",
-    status: "BOOKED",
-    clientId: 1,
-    psychologistId: 1,
   },
 ];
 

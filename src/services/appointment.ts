@@ -1,25 +1,48 @@
-import { Appointment } from '../types/appointment';
-import { mockAppointments } from './mockData';
+import { AppointmentData, Appointment } from "../types";
 
-export const createAppointment = async (data: Omit<Appointment, 'id' | 'status'>): Promise<Appointment> => {
-  const newApp: Appointment = { id: mockAppointments.length + 1, status: 'BOOKED', ...data };
-  mockAppointments.push(newApp);
-  return newApp;
+const mockAppointments: Appointment[] = [
+  {
+    id: 1,
+    date: "2025-06-13",
+    startTime: "18:00",
+    endTime: "19:00",
+    clientId: 8,
+  },
+  {
+    id: 2,
+    date: "2025-06-14",
+    startTime: "16:00",
+    endTime: "17:00",
+    clientId: 9,
+  },
+];
+
+export const createAppointment = async (
+  data: AppointmentData
+): Promise<Appointment> => {
+  const newAppointment = { id: Date.now(), ...data };
+  mockAppointments.push(newAppointment);
+
+  return newAppointment;
 };
 
-export const updateAppointment = async (id: number, data: Partial<Appointment>): Promise<Appointment> => {
-  const idx = mockAppointments.findIndex(a => a.id === id);
-  if (idx >= 0) {
-    mockAppointments[idx] = { ...mockAppointments[idx], ...data };
-    return mockAppointments[idx];
+export const updateAppointment = async (
+  id: number,
+  data: AppointmentData
+): Promise<Appointment> => {
+  const index = mockAppointments.findIndex((a) => a.id === id);
+  if (index === -1) {
+    throw new Error("Запись не найдена");
   }
-  throw new Error('Appointment not found');
+
+  mockAppointments[index] = { id, ...data };
+  return mockAppointments[index];
 };
 
-export const getAppointmentsByPsychologist = async (): Promise<Appointment[]> => {
+export const getPsychologistAppointments = async (): Promise<Appointment[]> => {
   return mockAppointments;
 };
 
-export const getAppointmentsByClient = async (): Promise<Appointment[]> => {
+export const getClientAppointments = async (): Promise<Appointment[]> => {
   return mockAppointments;
 };

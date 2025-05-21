@@ -1,9 +1,10 @@
-export interface Appointment {
-  id: number;
+export interface AppointmentData {
   date: string;
   startTime: string;
   endTime: string;
-  status: "BOOKED" | "CONFIRMED" | "CANCELLED";
   clientId: number;
-  psychologistId: number;
+}
+
+export interface Appointment extends AppointmentData {
+  id: number;
 }
