@@ -3,6 +3,8 @@
     "name": "therasync",
     "slug": "therasync",
     "version": "1.0.0",
+    "owner": "pacegg",
+    "scheme": "therasync",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
