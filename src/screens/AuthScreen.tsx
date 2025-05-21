@@ -11,9 +11,8 @@ const clientId = "7f8716ae1c5349cd86942c81c036d5a5";
 
 export default function AuthScreen() {
   const [token, setToken] = useState<string | null>(null);
-  const [userInfo, setUserInfo] = useState<any>(null);
 
-  const redirectUri = AuthSession.makeRedirectUri({ useProxy: true });
+  const redirectUri = AuthSession.makeRedirectUri({ useProxy: true } as any);
 
   const [request, response, promptAsync] = AuthSession.useAuthRequest(
     {
@@ -43,21 +42,9 @@ export default function AuthScreen() {
         .then((res) => {
           console.log("Access Token:", res.accessToken);
           setToken(res.accessToken);
-
-          // Получить данные пользователя
-          return fetch("https://login.yandex.ru/info?format=json", {
-            headers: {
-              Authorization: `Bearer ${res.accessToken}`,
-            },
-          });
-        })
-        .then((res) => res.json())
-        .then((data) => {
-          console.log("User info:", data);
-          setUserInfo(data);
         })
         .catch((err) => {
-          console.error("Ошибка получения токена или данных:", err);
+          console.error("Ошибка получения токена:", err);
         });
     }
   }, [response]);
@@ -67,15 +54,9 @@ export default function AuthScreen() {
       <Button
         disabled={!request}
         title="Войти через Яндекс"
-        onPress={() => promptAsync({ useProxy: true })}
+        onPress={() => promptAsync({ useProxy: true } as any)}
       />
-      {token && <Text style={{ marginTop: 20 }}>Токен: {token}</Text>}
-      {userInfo && (
-        <View style={{ marginTop: 20 }}>
-          <Text>Имя: {userInfo.first_name}</Text>
-          <Text>Почта: {userInfo.default_email}</Text>
-        </View>
-      )}
+      {token && <Text>Токен: {token}</Text>}
     </View>
   );
 }
