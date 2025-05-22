@@ -7,8 +7,14 @@ import UserOption from "../components/UserOption";
 import * as ImagePicker from "expo-image-picker";
 import ClientTask from "../components/ClientTask";
 import ClientsList from "./ClientsList";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { TOKEN_KEY } from "../api";
 
-export default function ProfileScreen({ navigation }: any) {
+type Props = {
+  logout: () => void;
+};
+
+export default function ProfileScreen({ logout }: Props) {
   const [avatarUri, setAvatarUri] = useState<string>("");
   const [editing, setEditing] = useState(false);
   const [inputText, setInputText] = useState("");
@@ -105,16 +111,8 @@ export default function ProfileScreen({ navigation }: any) {
           </View>
 
           {/* user options */}
-          <UserOption
-            iconName="person"
-            title="Личные данные"
-            func={() => navigation.navigate("ClientsList")}
-          />
-          <UserOption
-            iconName="settings"
-            title="Настройки"
-            func={() => navigation.navigate("ClientsList")}
-          />
+          <UserOption iconName="person" title="Личные данные" func={() => {}} />
+          <UserOption iconName="settings" title="Настройки" func={() => {}} />
           {isClient && (
             <UserOption
               iconName={"people"}
@@ -126,9 +124,14 @@ export default function ProfileScreen({ navigation }: any) {
             <UserOption
               iconName={"history"}
               title="История консультаций и заданий"
-              func={() => navigation.navigate("ClientsList")}
+              func={() => {}}
             />
           )}
+          <UserOption
+            iconName={"logout"}
+            title="Выйти из аккаунта"
+            func={logout}
+          />
         </ScrollView>
       )}
       {screen === "ClientsList" && <ClientsList />}

@@ -17,7 +17,11 @@ import ClientsList from "../screens/ClientsList";
 
 const Tab = createBottomTabNavigator();
 
-export default function Navigation() {
+type Props = {
+  logout: () => void;
+};
+
+export default function Navigation({ logout }: Props) {
   return (
     <NavigationContainer>
       <Tab.Navigator tabBar={(props) => <TabBar {...props} />}>
@@ -43,7 +47,7 @@ export default function Navigation() {
         />
         <Tab.Screen
           name="Profile"
-          component={ProfileScreen}
+          children={() => <ProfileScreen logout={logout} />}
           options={{ header: () => <Header /> }}
         />
       </Tab.Navigator>
