@@ -22,7 +22,8 @@ import {
   getClientAppointments,
   getPsychologistAppointments,
 } from "../services/appointment";
-import { Appointment } from "../types";
+import { getClientsByPsychologist } from "../services/client";
+import { Appointment, Client } from "../types";
 
 LocaleConfig.locales["ru"] = {
   monthNames: [
@@ -70,10 +71,24 @@ LocaleConfig.defaultLocale = "ru";
 
 export default function CalendarScreen() {
   const today = format(new Date(), "yyyy-MM-dd");
+  const [clientsMap, setClientsMap] = useState<{ [id: number]: string }>({});
   const [selected, setSelected] = useState(today);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [isRecordActive, setRecordActive] = useState<boolean>(false);
   const isClient = false;
+
+  const fetchClients = async () => {
+    try {
+      const clients = await getClientsByPsychologist();
+      const map: { [id: number]: string } = {};
+      clients.forEach((client) => {
+        map[client.id] = `${client.firstName} ${client.lastName}`;
+      });
+      setClientsMap(map);
+    } catch (error) {
+      console.error("Ошибка при получении клиентов:", error);
+    }
+  };
 
   const fetchAppointments = async () => {
     try {
@@ -88,7 +103,8 @@ export default function CalendarScreen() {
 
   useEffect(() => {
     fetchAppointments();
-  });
+    if (isClient) fetchClients();
+  }, []);
 
   const handleAddRecord = () => {
     setRecordActive(true);
@@ -203,7 +219,7 @@ export default function CalendarScreen() {
                   ) : (
                     <Task
                       key={appt.id}
-                      title={`С клиентом #${appt.clientId}`}
+                      title={`С клиентом #${clientsMap[appt.clientId]}`}
                       complete={true}
                       startTime={new Date(`${appt.date}T${appt.startTime}`)}
                       endTime={new Date(`${appt.date}T${appt.endTime}`)}
