@@ -10,6 +10,7 @@ import {
   ImageBackground,
   ToastAndroid,
   BackHandler,
+  FlatList,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import CustomButton from "../components/CustomButton";
@@ -21,9 +22,11 @@ import {
 } from "../services/appointment";
 import { format } from "date-fns";
 import { MaterialIcons } from "@expo/vector-icons";
+import { getClientsByPsychologist } from "../services/client";
+import { Client } from "../types";
 
 type Props = {
-  selectedDate: string; // формат: '2025-05-18'
+  selectedDate: string;
   confirmAddRecord: () => void;
   cancelAddRecord: () => void;
 };
@@ -36,30 +39,42 @@ export default function AddRecordScreen({
   const [startTime, setStartTime] = useState<Date | null>(null);
   const [endTime, setEndTime] = useState<Date | null>(null);
   const [showPicker, setShowPicker] = useState<"start" | "end" | null>(null);
-  const [search, setSearch] = useState<string>(""); // клиент ID
+  const [clients, setClients] = useState<Client[]>([]);
+  const [filteredClients, setFilteredClients] = useState<Client[]>([]);
+  const [search, setSearch] = useState<string>("");
+  const [selectedClientId, setSelectedClientId] = useState<number | null>(null);
 
   useEffect(() => {
-    const backAction = () => {
-      cancelAddRecord();
-      return true;
+    const loadClients = async () => {
+      const result = await getClientsByPsychologist();
+      setClients(result);
+      setFilteredClients(result);
     };
+    loadClients();
 
     const backHandler = BackHandler.addEventListener(
       "hardwareBackPress",
-      backAction
+      () => {
+        cancelAddRecord();
+        return true;
+      }
     );
 
     return () => backHandler.remove();
   }, []);
 
+  useEffect(() => {
+    const q = search.toLowerCase();
+    setFilteredClients(
+      clients.filter((client) => client.firstName.toLowerCase().includes(q))
+    );
+  }, [search, clients]);
+
   const handleTimeChange = (event: any, selectedTime?: Date) => {
     if (Platform.OS !== "ios") setShowPicker(null);
     if (!selectedTime) return;
-    if (showPicker === "start") {
-      setStartTime(selectedTime);
-    } else if (showPicker === "end") {
-      setEndTime(selectedTime);
-    }
+    if (showPicker === "start") setStartTime(selectedTime);
+    else if (showPicker === "end") setEndTime(selectedTime);
   };
 
   const checkOverlap = (
@@ -74,51 +89,50 @@ export default function AddRecordScreen({
   };
 
   const handleSaveRecord = async () => {
-    if (!startTime || !endTime || !search) {
+    if (!startTime || !endTime || !selectedClientId) {
       Alert.alert("Ошибка", "Пожалуйста, заполните все поля");
       return;
     }
 
-    // Проверка на корректный интервал
     const newStart = new Date(
       `${selectedDate}T${startTime.toTimeString().substring(0, 5)}:00`
     );
     const newEnd = new Date(
       `${selectedDate}T${endTime.toTimeString().substring(0, 5)}:00`
     );
+
     if (newEnd <= newStart) {
-      Alert.alert("Ошибка", "Время окончания должно быть позже времени начала");
+      Alert.alert("Ошибка", "Время окончания должно быть позже начала");
       return;
     }
 
-    // Проверка на пересечение времени
     try {
       const allAppointments = await getPsychologistAppointments();
       const todays = allAppointments.filter((app) => app.date === selectedDate);
       const conflict = todays.find((app) =>
         checkOverlap(newStart, newEnd, app.startTime, app.endTime)
       );
+
       if (conflict) {
         Alert.alert(
           "Ошибка",
-          `На выбранный интервал уже есть запись: с ${conflict.startTime} до ${conflict.endTime}`
+          `Запись пересекается: с ${conflict.startTime} до ${conflict.endTime}`
         );
         return;
       }
 
-      const appointment = {
+      await createAppointment({
         date: selectedDate,
         startTime: newStart.toTimeString().substring(0, 5),
         endTime: newEnd.toTimeString().substring(0, 5),
-        clientId: Number(search),
-      };
+        clientId: selectedClientId,
+      });
 
-      await createAppointment(appointment);
       ToastAndroid.show("Запись добавлена", ToastAndroid.SHORT);
       confirmAddRecord();
     } catch (error) {
       Alert.alert("Ошибка", "Не удалось сохранить запись");
-      console.error("Ошибка при создании записи:", error);
+      console.error(error);
     }
   };
 
@@ -128,10 +142,7 @@ export default function AddRecordScreen({
       source={require("../assets/background.png")}
       resizeMode="cover"
     >
-      <TouchableOpacity
-        style={styles.backButton}
-        onPress={() => cancelAddRecord()}
-      >
+      <TouchableOpacity style={styles.backButton} onPress={cancelAddRecord}>
         <MaterialIcons name="arrow-back" size={24} color={Colors.icon} />
       </TouchableOpacity>
 
@@ -141,7 +152,7 @@ export default function AddRecordScreen({
 
       <View style={styles.timeContainer}>
         <View style={{ width: "50%" }}>
-          <Text style={{ textAlign: "center", fontSize: 20 }}>Начало</Text>
+          <Text style={styles.timeLabel}>Начало</Text>
           <TouchableOpacity
             style={styles.inputTime}
             onPress={() => setShowPicker("start")}
@@ -149,9 +160,8 @@ export default function AddRecordScreen({
             <Text>{formatTime(startTime)}</Text>
           </TouchableOpacity>
         </View>
-
         <View style={{ width: "50%" }}>
-          <Text style={{ textAlign: "center", fontSize: 20 }}>Конец</Text>
+          <Text style={styles.timeLabel}>Конец</Text>
           <TouchableOpacity
             style={styles.inputTime}
             onPress={() => setShowPicker("end")}
@@ -173,14 +183,33 @@ export default function AddRecordScreen({
 
       <TextInput
         style={styles.searchInput}
-        placeholder="Введите ID клиента"
+        placeholder="Поиск клиента по имени"
         value={search}
         onChangeText={setSearch}
       />
 
+      <View style={{ flex: 1 }}>
+        <FlatList
+          showsVerticalScrollIndicator={true}
+          data={filteredClients}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={[
+                styles.clientItem,
+                item.id === selectedClientId && styles.clientItemSelected,
+              ]}
+              onPress={() => setSelectedClientId(item.id)}
+            >
+              <Text style={styles.clientText}>{item.firstName}</Text>
+            </TouchableOpacity>
+          )}
+        />
+      </View>
+
       <CustomButton
         title="Сохранить"
-        backgroundColorProp={"white"}
+        backgroundColorProp="white"
         onClick={handleSaveRecord}
       />
     </ImageBackground>
@@ -209,6 +238,10 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     height: 70,
   },
+  timeLabel: {
+    textAlign: "center",
+    fontSize: 20,
+  },
   inputTime: {
     flex: 1,
     backgroundColor: "white",
@@ -216,6 +249,23 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 10,
     alignItems: "center",
+  },
+  label: {
+    fontSize: 16,
+    marginBottom: 4,
+  },
+  clientItem: {
+    backgroundColor: "#fff",
+    padding: 10,
+    marginVertical: 4,
+    borderRadius: 8,
+  },
+  clientItemSelected: {
+    borderColor: Colors.primary,
+    borderWidth: 2,
+  },
+  clientText: {
+    fontSize: 16,
   },
   searchInput: {
     backgroundColor: "white",

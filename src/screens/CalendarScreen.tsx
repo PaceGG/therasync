@@ -5,6 +5,7 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
+  ImageBackground,
 } from "react-native";
 import { Calendar, LocaleConfig } from "react-native-calendars";
 import { Colors } from "../constants/colors";
@@ -117,8 +118,12 @@ export default function CalendarScreen() {
           cancelAddRecord={cancelAddRecord}
         />
       ) : (
-        <View style={styles.container}>
+        <ImageBackground
+          style={styles.container}
+          source={require("../assets/background.png")}
+        >
           <Calendar
+            style={{ borderRadius: 20, paddingBottom: 10 }}
             markedDates={{
               [selected]: {
                 selected: true,
@@ -220,7 +225,7 @@ export default function CalendarScreen() {
               />
             )}
           </View>
-        </View>
+        </ImageBackground>
       )}
     </>
   );
@@ -229,7 +234,7 @@ export default function CalendarScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.lightContainerBackground,
+    // backgroundColor: Colors.lightContainerBackground,
     justifyContent: "space-between",
     paddingHorizontal: 20,
     paddingTop: 20,
@@ -242,9 +247,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   modal: {
-    backgroundColor: Colors.containerBackground,
+    // backgroundColor: Colors.containerBackground,
+    backgroundColor: "white",
     gap: 22,
     padding: 20,
+    paddingBottom: 40,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
   },
