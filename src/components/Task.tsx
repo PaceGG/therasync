@@ -26,28 +26,22 @@ export default function Task({ title, startTime, endTime, complete }: Props) {
       }}
     >
       {/* Основной контент задачи */}
-      <View>
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            marginVertical: 6,
-          }}
-        >
-          <Ionicons
-            name="checkmark"
-            size={18}
-            color="#4e4e4e"
-            style={[
-              styles.checkmark,
-              { backgroundColor: complete ? "#b8c0fe" : "#c2c2c2" },
-            ]}
-          />
+      <View style={{ flexDirection: "row", alignItems: "center" }}>
+        <Ionicons
+          name="checkmark"
+          size={18}
+          color="#4e4e4e"
+          style={[
+            styles.checkmark,
+            { backgroundColor: complete ? "#b8c0fe" : "#c2c2c2" },
+          ]}
+        />
+        <View style={{ justifyContent: "center" }}>
           <Text style={{ fontSize: 15 }}>{title}</Text>
+          <Text style={{ color: "#555" }}>
+            {formatTime(startTime)} - {formatTime(endTime)}
+          </Text>
         </View>
-        <Text style={{ marginLeft: 40, marginTop: -10 }}>
-          {formatTime(startTime)} - {formatTime(endTime)}
-        </Text>
       </View>
 
       {/* Кнопка для показа модалки */}
