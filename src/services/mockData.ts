@@ -30,11 +30,17 @@ export const mockUser: User = {
 };
 
 export const mockClients: Client[] = [
-  {
-    id: 1,
-    firstName: "Анна",
-    lastName: "Иванова",
-  },
+  { id: 1, firstName: "Анна", lastName: "Иванова" },
+  { id: 2, firstName: "Игорь", lastName: "Смирнов" },
+  { id: 3, firstName: "Мария", lastName: "Кузнецова" },
+  { id: 4, firstName: "Дмитрий", lastName: "Попов" },
+  { id: 5, firstName: "Елена", lastName: "Новикова" },
+  { id: 6, firstName: "Алексей", lastName: "Соколов" },
+  { id: 7, firstName: "Ольга", lastName: "Лебедева" },
+  { id: 8, firstName: "Николай", lastName: "Козлов" },
+  { id: 9, firstName: "Татьяна", lastName: "Морозова" },
+  { id: 10, firstName: "Сергей", lastName: "Петров" },
+  { id: 11, firstName: "Find", lastName: "Me" },
 ];
 
 export const mockTasks: Task[] = [
