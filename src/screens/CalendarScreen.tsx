@@ -220,7 +220,9 @@ export default function CalendarScreen() {
                     <Task
                       key={appt.id}
                       title={`С клиентом #${clientsMap[appt.clientId]}`}
-                      complete={true}
+                      complete={
+                        new Date(`${appt.date}T${appt.endTime}`) < new Date()
+                      }
                       startTime={new Date(`${appt.date}T${appt.startTime}`)}
                       endTime={new Date(`${appt.date}T${appt.endTime}`)}
                     />
