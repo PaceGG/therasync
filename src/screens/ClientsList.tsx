@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -12,29 +12,37 @@ import {
 import ClientItem from "../components/ClientItem";
 import { Ionicons, Feather, MaterialIcons } from "@expo/vector-icons";
 import { Colors } from "../constants/colors";
-
-const clients = ["Иван", "Валерий", "Фёдор", "Леся", "Ольга", "FindMe"];
+import { getClientsByPsychologist } from "../services/client";
+import { Client } from "../types";
 
 export default function App() {
+  const [clientsList, setClientsList] = useState<Client[]>([]);
   const [selectedClient, setSelectedClient] = useState<string | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+
+  useEffect(() => {
+    const fetchClients = async () => {
+      const clients = await getClientsByPsychologist();
+      setClientsList(clients);
+    };
+    fetchClients();
+  }, []);
 
   const handleMorePress = (name: string) => {
     setSelectedClient(name);
     setModalVisible(true);
   };
 
-  const filteredClients = clients.filter((client) =>
+  const filteredClients = clientsList.filter((client) =>
     searchQuery.trim() === ""
       ? true
-      : client.toLowerCase().includes(searchQuery.toLowerCase())
+      : client.firstName.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.header}>Клиенты</Text>
-
       <View style={styles.searchContainer}>
         <TextInput
           placeholder="Поиск..."
@@ -46,19 +54,16 @@ export default function App() {
           <Ionicons name="add" size={24} color="#555" />
         </TouchableOpacity>
       </View>
-
       <FlatList
         data={filteredClients}
-        keyExtractor={(item) => item}
+        keyExtractor={(item: Client) => item.id.toString()}
         renderItem={({ item }) => (
-          <ClientItem name={item} onMorePress={() => handleMorePress(item)} />
+          <ClientItem
+            name={item.firstName}
+            onMorePress={() => handleMorePress(item.lastName)}
+          />
         )}
       />
-
-      <TouchableOpacity style={styles.downloadButton}>
-        <Text style={styles.downloadText}>Скачать список</Text>
-      </TouchableOpacity>
-
       <Modal visible={modalVisible} transparent animationType="fade">
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
@@ -117,17 +122,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#ddd",
     borderRadius: 8,
     padding: 8,
-  },
-  downloadButton: {
-    backgroundColor: Colors.primary,
-    margin: 16,
-    borderRadius: 12,
-    padding: 14,
-    alignItems: "center",
-  },
-  downloadText: {
-    color: "#fff",
-    fontSize: 16,
   },
   modalOverlay: {
     flex: 1,

@@ -1,8 +1,8 @@
-import api from './index';
-import { Client } from '../types/client';
+import { api } from "./index";
+import { Client } from "../types/client";
 
 export const getClientsByPsychologist = async (): Promise<Client[]> => {
-  const response = await api.get('/clients/by-psychologist');
+  const response = await api.get("/clients/by-psychologist");
   return response.data;
 };
 
