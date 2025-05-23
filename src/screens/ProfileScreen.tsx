@@ -1,4 +1,11 @@
-import { Text, Image, View, TouchableOpacity, Alert } from "react-native";
+import {
+  Text,
+  Image,
+  View,
+  TouchableOpacity,
+  Alert,
+  ImageBackground,
+} from "react-native";
 import { ScrollView, StyleSheet } from "react-native";
 import { Colors } from "../constants/colors";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -21,7 +28,6 @@ export default function ProfileScreen({ logout }: Props) {
   useEffect(() => {
     (async () => {
       const json = await AsyncStorage.getItem("YANDEX_PROFILE");
-      console.log(json);
       if (json) {
         try {
           const profile = JSON.parse(json);
@@ -47,43 +53,52 @@ export default function ProfileScreen({ logout }: Props) {
         </TouchableOpacity>
       )}
       {screen === "profile" && (
-        <ScrollView style={styles.mainContainer}>
-          {/* user header */}
-          <View style={styles.userHeader}>
-            <Image
-              source={
-                avatarUri
-                  ? { uri: avatarUri }
-                  : require("../assets/noavatar.png")
-              }
-              style={styles.avatar}
-            />
-            <Text style={{ fontSize: 20 }}>{realName}</Text>
-          </View>
+        <ImageBackground
+          source={require("../assets/background.png")}
+          style={{ height: "100%" }}
+        >
+          <ScrollView style={styles.mainContainer}>
+            {/* user header */}
+            <View style={styles.userHeader}>
+              <Image
+                source={
+                  avatarUri
+                    ? { uri: avatarUri }
+                    : require("../assets/noavatar.png")
+                }
+                style={styles.avatar}
+              />
+              <Text style={{ fontSize: 20 }}>{realName}</Text>
+            </View>
 
-          {/* user options */}
-          <UserOption iconName="person" title="Личные данные" func={() => {}} />
-          <UserOption iconName="settings" title="Настройки" func={() => {}} />
-          {isClient && (
+            {/* user options */}
             <UserOption
-              iconName={"people"}
-              title="Список клиентов"
-              func={() => setScreen("ClientsList")}
-            />
-          )}
-          {isClient && (
-            <UserOption
-              iconName={"history"}
-              title="История консультаций и заданий"
+              iconName="person"
+              title="Личные данные"
               func={() => {}}
             />
-          )}
-          <UserOption
-            iconName={"logout"}
-            title="Выйти из аккаунта"
-            func={logout}
-          />
-        </ScrollView>
+            <UserOption iconName="settings" title="Настройки" func={() => {}} />
+            {isClient && (
+              <UserOption
+                iconName={"people"}
+                title="Список клиентов"
+                func={() => setScreen("ClientsList")}
+              />
+            )}
+            {isClient && (
+              <UserOption
+                iconName={"history"}
+                title="История консультаций и заданий"
+                func={() => {}}
+              />
+            )}
+            <UserOption
+              iconName={"logout"}
+              title="Выйти из аккаунта"
+              func={logout}
+            />
+          </ScrollView>
+        </ImageBackground>
       )}
       {screen === "ClientsList" && <ClientsList />}
     </>
@@ -98,7 +113,7 @@ const styles = StyleSheet.create({
     zIndex: 300,
   },
   mainContainer: {
-    backgroundColor: Colors.lightContainerBackground,
+    // backgroundColor: Colors.lightContainerBackground,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
   },
