@@ -8,6 +8,7 @@ import {
   TextInput,
   StyleSheet,
   SafeAreaView,
+  ToastAndroid,
 } from "react-native";
 import ClientItem from "../components/ClientItem";
 import { Ionicons, Feather, MaterialIcons } from "@expo/vector-icons";
@@ -19,6 +20,7 @@ export default function App() {
   const [clientsList, setClientsList] = useState<Client[]>([]);
   const [selectedClientId, setSelectedClientId] = useState<number | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
@@ -34,6 +36,11 @@ export default function App() {
     setModalVisible(true);
   };
 
+  const handleDeletePress = () => {
+    setConfirmDeleteVisible(true);
+    setModalVisible(false);
+  };
+
   const handleDelete = async () => {
     if (selectedClientId === null) return;
 
@@ -43,8 +50,9 @@ export default function App() {
     } catch (e) {
       console.error("Ошибка при удалении клиента:", e);
     } finally {
-      setModalVisible(false);
+      setConfirmDeleteVisible(false);
       setSelectedClientId(null);
+      ToastAndroid.show(`Клиент успешно удален`, ToastAndroid.LONG);
     }
   };
 
@@ -57,6 +65,8 @@ export default function App() {
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.header}>Клиенты</Text>
+
+      {/* Список клиентов */}
       <View style={styles.searchContainer}>
         <TextInput
           placeholder="Поиск..."
@@ -78,6 +88,8 @@ export default function App() {
           />
         )}
       />
+
+      {/* Модалка клиента */}
       <Modal visible={modalVisible} transparent animationType="fade">
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
@@ -89,7 +101,10 @@ export default function App() {
               <Feather name="check-square" size={20} color={Colors.icon} />
               <Text style={styles.modalText}>Задания пользователя</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.modalItem} onPress={handleDelete}>
+            <TouchableOpacity
+              style={styles.modalItem}
+              onPress={handleDeletePress}
+            >
               <MaterialIcons name="delete" size={20} color="red" />
               <Text style={[styles.modalText, { color: "red" }]}>
                 Удалить клиента
@@ -101,6 +116,31 @@ export default function App() {
             >
               <Ionicons name="close" size={20} color={Colors.icon} />
             </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Модалка подтверждения удаления клиента */}
+      <Modal visible={confirmDeleteVisible} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={[styles.modalText, { marginBottom: 12 }]}>
+              Удалить клиента?
+            </Text>
+            <View
+              style={{ flexDirection: "row", justifyContent: "space-between" }}
+            >
+              <TouchableOpacity onPress={() => setConfirmDeleteVisible(false)}>
+                <Text style={[styles.modalText, { color: Colors.icon }]}>
+                  Отмена
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleDelete}>
+                <Text style={[styles.modalText, { color: "red" }]}>
+                  Удалить
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
