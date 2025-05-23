@@ -1,66 +1,58 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
-  SafeAreaView,
-  FlatList,
-  TouchableOpacity,
+  View,
   Text,
   TextInput,
-  View,
+  FlatList,
+  TouchableOpacity,
+  SafeAreaView,
   KeyboardAvoidingView,
-  ActivityIndicator,
   StyleSheet,
 } from "react-native";
-import { MaterialIcons } from "@expo/vector-icons";
 import { Colors } from "../constants/colors";
-import type { ChatRoom, Message } from "../types/chat";
+import { MaterialIcons } from "@expo/vector-icons";
 import { getChatRooms, getMessages, sendMessage } from "../services/chat";
-import { getUserId } from "../services/auth";
+import { ChatRoom, Message, User } from "../types";
+import { getUserById, getUserId } from "../services/auth";
 
-const ChatSelection = ({
-  onSelectChat,
-}: {
-  onSelectChat: (chat: ChatRoom) => void;
-}) => {
+const ChatSelection = ({ onSelectChat }: any) => {
   const [chatRooms, setChatRooms] = useState<ChatRoom[]>([]);
-  const [lastMessages, setLastMessages] = useState<{ [key: number]: string }>(
-    {}
-  );
-  const [loading, setLoading] = useState(true);
-  const [userId, setUserId] = useState<number>();
+  const [interlocutors, setInterlocutors] = useState<Record<number, User>>({});
+  const [lastMessages, setLastMessages] = useState<
+    Record<number, Message | undefined>
+  >({});
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
 
   useEffect(() => {
-    async function fetchChats() {
-      setLoading(true);
+    async function loadChats() {
       const userId = await getUserId();
-      setUserId(userId);
+      setCurrentUserId(userId);
       const rooms = await getChatRooms(userId);
       setChatRooms(rooms);
 
-      const messagesPromises = rooms.map((room) => getMessages(room.id));
-      const allMessages = await Promise.all(messagesPromises);
+      const usersMap: Record<number, User> = {};
+      const messagesMap: Record<number, Message | undefined> = {};
 
-      const lastMsgs: { [key: number]: string } = {};
-      rooms.forEach((room, idx) => {
-        const msgs = allMessages[idx];
-        if (msgs.length > 0) {
-          lastMsgs[room.id] = msgs[msgs.length - 1].text;
-        } else {
-          lastMsgs[room.id] = "Нет сообщений";
-        }
-      });
-      setLastMessages(lastMsgs);
-      setLoading(false);
+      await Promise.all(
+        rooms.map(async (room) => {
+          const interlocutorId =
+            room.participant1Id === userId
+              ? room.participant2Id
+              : room.participant1Id;
+          const user = await getUserById(interlocutorId);
+          usersMap[room.id] = user;
+
+          const messages = await getMessages(room.id);
+          messagesMap[room.id] = messages[messages.length - 1];
+        })
+      );
+
+      setInterlocutors(usersMap);
+      setLastMessages(messagesMap);
     }
-    fetchChats();
-  }, []);
 
-  if (loading) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <ActivityIndicator size="large" color={Colors.primary} />
-      </SafeAreaView>
-    );
-  }
+    loadChats();
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -69,67 +61,50 @@ const ChatSelection = ({
         data={chatRooms}
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={{ paddingBottom: 16 }}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={styles.chatItem}
-            onPress={() => onSelectChat(item)}
-          >
-            <Text style={styles.chatName}>Чат #{item.id}</Text>
-            <Text style={styles.lastMessage}>{lastMessages[item.id]}</Text>
-          </TouchableOpacity>
-        )}
+        renderItem={({ item }) => {
+          const user = interlocutors[item.id];
+          const message = lastMessages[item.id];
+          return (
+            <TouchableOpacity
+              style={styles.chatItem}
+              onPress={() => onSelectChat(item)}
+            >
+              <Text style={styles.chatName}>
+                {user ? `${user.lastName} ${user.firstName}` : "..."}
+              </Text>
+              <Text style={styles.lastMessage}>{message?.text ?? ""}</Text>
+            </TouchableOpacity>
+          );
+        }}
       />
     </SafeAreaView>
   );
 };
 
-const ChatView = ({ chat, onBack }: { chat: ChatRoom; onBack: () => void }) => {
+const ChatView = ({ chat, onBack }: any) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [sending, setSending] = useState(false);
-  const [userId, setUserId] = useState<number>(-1);
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
 
   useEffect(() => {
-    async function fetchMessages() {
+    async function loadMessages() {
       const userId = await getUserId();
-      setUserId(userId);
-      setLoading(true);
-      const msgs = await getMessages(chat.id);
-      setMessages(msgs);
-      setLoading(false);
+      setCurrentUserId(userId);
+      const data = await getMessages(chat.id);
+      setMessages(data);
     }
-    fetchMessages();
+    loadMessages();
   }, [chat]);
 
   const handleSend = async () => {
-    if (inputText.trim() === "") return;
-    setSending(true);
-    try {
-      const newMsg = await sendMessage(chat.id, userId, inputText.trim());
-      setMessages((prev) => [...prev, newMsg]);
-      setInputText("");
-    } catch (e) {
-      console.warn("Ошибка отправки сообщения", e);
-    } finally {
-      setSending(false);
-    }
+    if (inputText.trim() === "" || currentUserId === null) return;
+    const newMsg = await sendMessage(chat.id, currentUserId, inputText.trim());
+    setMessages((prev) => [...prev, newMsg]);
+    setInputText("");
   };
 
-  if (loading) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <ActivityIndicator size="large" color={Colors.primary} />
-      </SafeAreaView>
-    );
-  }
-
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior="padding"
-      keyboardVerticalOffset={90}
-    >
+    <KeyboardAvoidingView style={styles.container}>
       <SafeAreaView style={{ flex: 1 }}>
         <TouchableOpacity onPress={onBack} style={styles.backButton}>
           <Text style={styles.backText}>{"<"} Назад</Text>
@@ -143,7 +118,7 @@ const ChatView = ({ chat, onBack }: { chat: ChatRoom; onBack: () => void }) => {
             <View
               style={[
                 styles.messageBubble,
-                item.senderId === userId
+                item.senderId === currentUserId
                   ? styles.userMessage
                   : styles.otherMessage,
               ]}
@@ -158,13 +133,8 @@ const ChatView = ({ chat, onBack }: { chat: ChatRoom; onBack: () => void }) => {
             placeholder="Сообщение..."
             value={inputText}
             onChangeText={setInputText}
-            editable={!sending}
           />
-          <TouchableOpacity
-            style={[styles.sendButton, sending && { opacity: 0.5 }]}
-            onPress={handleSend}
-            disabled={sending}
-          >
+          <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
             <MaterialIcons name="send" color={"white"} size={18} />
           </TouchableOpacity>
         </View>
@@ -175,7 +145,6 @@ const ChatView = ({ chat, onBack }: { chat: ChatRoom; onBack: () => void }) => {
 
 export default function ChatScreen() {
   const [selectedChat, setSelectedChat] = useState<ChatRoom | null>(null);
-
   return selectedChat ? (
     <ChatView chat={selectedChat} onBack={() => setSelectedChat(null)} />
   ) : (
@@ -208,7 +177,6 @@ const styles = StyleSheet.create({
   lastMessage: {
     fontSize: 14,
     color: "#666",
-    marginTop: 4,
   },
   backButton: {
     padding: 16,
