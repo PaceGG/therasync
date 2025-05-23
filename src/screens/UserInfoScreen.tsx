@@ -14,6 +14,7 @@ import * as Clipboard from "expo-clipboard";
 import { Colors } from "../constants/colors";
 import CustomButton from "../components/CustomButton";
 import { MaterialIcons } from "@expo/vector-icons";
+import { getUser, putUser } from "../services/auth";
 
 export default function UserInfoScreen() {
   const [id, setId] = useState("");
@@ -22,33 +23,19 @@ export default function UserInfoScreen() {
 
   useEffect(() => {
     (async () => {
-      const yandexJson = await AsyncStorage.getItem("YANDEX_PROFILE");
-      const appFirstName = await AsyncStorage.getItem("appFirstName");
-      const appLastName = await AsyncStorage.getItem("appLastName");
-
-      if (yandexJson) {
-        const profile = JSON.parse(yandexJson);
-        setId(profile.id?.toString() || "—");
-
-        if (appFirstName || appLastName) {
-          setFirstName(appFirstName || "");
-          setLastName(appLastName || "");
-        } else if (profile.firstName || profile.lastName) {
-          setFirstName(profile.firstName || "");
-          setLastName(profile.lastName || "");
-        } else if (profile.realName) {
-          const [first = "", last = ""] = profile.realName.split(" ");
-          setFirstName(first);
-          setLastName(last);
-        }
-      }
+      const user = await getUser();
+      setId(String(user.id));
+      setFirstName(user.firstName);
+      setLastName(user.lastName);
     })();
   }, []);
 
   const saveChanges = async () => {
     try {
-      await AsyncStorage.setItem("appFirstName", firstName);
-      await AsyncStorage.setItem("appLastName", lastName);
+      const updatedUser = await putUser({ firstName, lastName });
+
+      setFirstName(updatedUser.firstName);
+      setLastName(updatedUser.lastName);
       ToastAndroid.show("Данные сохранены", ToastAndroid.LONG);
     } catch (e) {
       Alert.alert("Ошибка", "Не удалось сохранить данные");

@@ -16,6 +16,8 @@ import ClientTask from "../components/ClientTask";
 import ClientsList from "./ClientsList";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import UserInfoScreen from "./UserInfoScreen";
+import { getUser } from "../services/auth";
+import { User } from "../types";
 
 type Props = {
   logout: () => void;
@@ -23,17 +25,15 @@ type Props = {
 
 export default function ProfileScreen({ logout }: Props) {
   const [avatarUri, setAvatarUri] = useState<string>("");
-  const [firstName, setFirstName] = useState<string>("Имя не найдено");
-  const [lastName, setLastName] = useState<string>("Фамилия не найдена");
+  const [user, setUser] = useState<User>();
   const [screen, setScreen] = useState<string>("profile");
-  const isClient = true;
+  const isPsychologist = true;
 
   useEffect(() => {
     (async () => {
-      const first = await getFirstName();
-      const last = await getLastName();
-      setFirstName(first);
-      setLastName(last);
+      const user = await getUser();
+      if (!user) logout();
+      setUser(user);
 
       try {
         const yandexJson = await AsyncStorage.getItem("YANDEX_PROFILE");
@@ -57,52 +57,14 @@ export default function ProfileScreen({ logout }: Props) {
     })();
   }, []);
 
-  const getFirstName = async (): Promise<string> => {
-    try {
-      const [yandexJson, appFirstName] = await Promise.all([
-        AsyncStorage.getItem("YANDEX_PROFILE"),
-        AsyncStorage.getItem("appFirstName"),
-      ]);
-      if (yandexJson) {
-        const profile = JSON.parse(yandexJson);
-        if (appFirstName) {
-          return appFirstName;
-        }
-        return profile.firstName || "Пользователь";
-      }
-      return "Пользователь";
-    } catch (e) {
-      console.warn("Ошибка чтения имени из стоража:", e);
-      return "Пользователь";
-    }
-  };
-
-  const getLastName = async (): Promise<string> => {
-    try {
-      const [yandexJson, appLastName] = await Promise.all([
-        AsyncStorage.getItem("YANDEX_PROFILE"),
-        AsyncStorage.getItem("appLastName"),
-      ]);
-      if (yandexJson) {
-        const profile = JSON.parse(yandexJson);
-        if (appLastName) {
-          return appLastName;
-        }
-        return profile.lastName || "";
-      }
-      return "";
-    } catch (e) {
-      console.warn("Ошибка чтения фамилии из стоража:", e);
-      return "";
-    }
-  };
+  if (!user) {
+    return;
+  }
 
   const handleBackButton = async () => {
     setScreen("profile");
-    const first = await getFirstName();
-    const last = await getLastName();
-    setFirstName(first);
-    setLastName(last);
+    const user = await getUser();
+    setUser(user);
   };
 
   return (
@@ -129,7 +91,7 @@ export default function ProfileScreen({ logout }: Props) {
                 style={styles.avatar}
               />
               <Text style={{ fontSize: 20 }}>
-                {firstName} {lastName}
+                {user.firstName} {user.lastName}
               </Text>
             </View>
 
@@ -140,14 +102,14 @@ export default function ProfileScreen({ logout }: Props) {
               func={() => setScreen("UserInfo")}
             />
             <UserOption iconName="settings" title="Настройки" func={() => {}} />
-            {isClient && (
+            {isPsychologist && (
               <UserOption
                 iconName={"people"}
                 title="Список клиентов"
                 func={() => setScreen("ClientsList")}
               />
             )}
-            {isClient && (
+            {isPsychologist && (
               <UserOption
                 iconName={"history"}
                 title="История консультаций и заданий"

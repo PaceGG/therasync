@@ -29,6 +29,12 @@ export const mockUsers: User[] = [
     lastName: "Пупкин",
     role: "CLIENT",
   },
+  {
+    id: 1709255700,
+    firstName: "Юрий",
+    lastName: "Буторин",
+    role: "PSYCHOLOGIST",
+  },
 ];
 
 export const mockClients: Client[] = [
