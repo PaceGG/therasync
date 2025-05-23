@@ -1,87 +1,146 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
-  View,
-  Text,
-  TextInput,
+  SafeAreaView,
   FlatList,
   TouchableOpacity,
-  SafeAreaView,
+  Text,
+  TextInput,
+  View,
   KeyboardAvoidingView,
+  ActivityIndicator,
   StyleSheet,
 } from "react-native";
-import { Colors } from "../constants/colors";
 import { MaterialIcons } from "@expo/vector-icons";
+import { Colors } from "../constants/colors";
+import type { ChatRoom, Message } from "../types/chat";
+import { getChatRooms, getMessages, sendMessage } from "../services/chat";
 
-const chatList = [
-  { id: "1", name: "Психолог раз", lastMessage: "Здравствуйте!" },
-  { id: "2", name: "Психолог два", lastMessage: "Как Ваше состояние?" },
-  { id: "3", name: "Психолог три", lastMessage: "Начнём нашу первую сессию?" },
-  { id: "4", name: "Психолог три", lastMessage: "Начнём нашу первую сессию?" },
-  { id: "5", name: "Психолог три", lastMessage: "Начнём нашу первую сессию?" },
-  { id: "6", name: "Психолог три", lastMessage: "Начнём нашу первую сессию?" },
-  { id: "7", name: "Психолог три", lastMessage: "Начнём нашу первую сессию?" },
-  { id: "8", name: "Психолог три", lastMessage: "Начнём нашу первую сессию?" },
-  { id: "9", name: "Психолог три", lastMessage: "Начнём нашу первую сессию?" },
-  { id: "10", name: "Психолог три", lastMessage: "Начнём нашу первую сессию?" },
-  { id: "11", name: "Психолог три", lastMessage: "Начнём нашу первую сессию?" },
-  { id: "12", name: "Психолог три", lastMessage: "Начнём нашу первую сессию?" },
-];
+const USER_ID = 1; // Текущий пользователь (для мок-сервиса)
 
-const messages = [
-  {
-    id: "1",
-    fromUser: false,
-    text: "Всё суета сует и возня...\nЯ виновен в смерти Христа и виноват за этот ад…",
-  },
-  { id: "2", fromUser: false, text: "Что по заданию, бро?" },
-  { id: "3", fromUser: false, text: "📎 Файл" },
-  { id: "4", fromUser: true, text: "👍" },
-];
+const ChatSelection = ({
+  onSelectChat,
+}: {
+  onSelectChat: (chat: ChatRoom) => void;
+}) => {
+  const [chatRooms, setChatRooms] = useState<ChatRoom[]>([]);
+  const [lastMessages, setLastMessages] = useState<{ [key: number]: string }>(
+    {}
+  );
+  const [loading, setLoading] = useState(true);
 
-const ChatSelection = ({ onSelectChat }: any) => (
-  <SafeAreaView style={styles.container}>
-    <TextInput style={styles.searchInput} placeholder="Поиск..." />
-    <FlatList
-      data={chatList}
-      keyExtractor={(item) => item.id}
-      contentContainerStyle={{ paddingBottom: 16 }}
-      renderItem={({ item }) => (
-        <TouchableOpacity
-          style={styles.chatItem}
-          onPress={() => onSelectChat(item)}
-        >
-          <Text style={styles.chatName}>{item.name}</Text>
-          <Text style={styles.lastMessage}>{item.lastMessage}</Text>
-        </TouchableOpacity>
-      )}
-    />
-  </SafeAreaView>
-);
+  useEffect(() => {
+    async function fetchChats() {
+      setLoading(true);
+      const rooms = await getChatRooms(USER_ID);
+      setChatRooms(rooms);
 
-const ChatView = ({ chat, onBack }: any) => {
-  const [inputText, setInputText] = useState("");
+      const messagesPromises = rooms.map((room) => getMessages(room.id));
+      const allMessages = await Promise.all(messagesPromises);
 
-  const handleSend = () => {
-    if (inputText.trim() === "") return;
-    setInputText("");
-  };
+      const lastMsgs: { [key: number]: string } = {};
+      rooms.forEach((room, idx) => {
+        const msgs = allMessages[idx];
+        if (msgs.length > 0) {
+          lastMsgs[room.id] = msgs[msgs.length - 1].text;
+        } else {
+          lastMsgs[room.id] = "Нет сообщений";
+        }
+      });
+      setLastMessages(lastMsgs);
+      setLoading(false);
+    }
+    fetchChats();
+  }, []);
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <ActivityIndicator size="large" color={Colors.primary} />
+      </SafeAreaView>
+    );
+  }
 
   return (
-    <KeyboardAvoidingView style={styles.container}>
+    <SafeAreaView style={styles.container}>
+      <TextInput style={styles.searchInput} placeholder="Поиск..." />
+      <FlatList
+        data={chatRooms}
+        keyExtractor={(item) => item.id.toString()}
+        contentContainerStyle={{ paddingBottom: 16 }}
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            style={styles.chatItem}
+            onPress={() => onSelectChat(item)}
+          >
+            <Text style={styles.chatName}>Чат #{item.id}</Text>
+            <Text style={styles.lastMessage}>{lastMessages[item.id]}</Text>
+          </TouchableOpacity>
+        )}
+      />
+    </SafeAreaView>
+  );
+};
+
+const ChatView = ({ chat, onBack }: { chat: ChatRoom; onBack: () => void }) => {
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [inputText, setInputText] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [sending, setSending] = useState(false);
+
+  useEffect(() => {
+    async function fetchMessages() {
+      setLoading(true);
+      const msgs = await getMessages(chat.id);
+      setMessages(msgs);
+      setLoading(false);
+    }
+    fetchMessages();
+  }, [chat]);
+
+  const handleSend = async () => {
+    if (inputText.trim() === "") return;
+    setSending(true);
+    try {
+      const newMsg = await sendMessage(chat.id, USER_ID, inputText.trim());
+      setMessages((prev) => [...prev, newMsg]);
+      setInputText("");
+    } catch (e) {
+      console.warn("Ошибка отправки сообщения", e);
+    } finally {
+      setSending(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <ActivityIndicator size="large" color={Colors.primary} />
+      </SafeAreaView>
+    );
+  }
+
+  return (
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior="padding"
+      keyboardVerticalOffset={90}
+    >
       <SafeAreaView style={{ flex: 1 }}>
         <TouchableOpacity onPress={onBack} style={styles.backButton}>
           <Text style={styles.backText}>{"<"} Назад</Text>
         </TouchableOpacity>
-        <Text style={styles.chatHeader}>{chat.name}</Text>
+        <Text style={styles.chatHeader}>Чат #{chat.id}</Text>
         <FlatList
           data={messages}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item.id.toString()}
           contentContainerStyle={{ padding: 16, paddingBottom: 80 }}
           renderItem={({ item }) => (
             <View
               style={[
                 styles.messageBubble,
-                item.fromUser ? styles.userMessage : styles.otherMessage,
+                item.senderId === USER_ID
+                  ? styles.userMessage
+                  : styles.otherMessage,
               ]}
             >
               <Text style={styles.messageText}>{item.text}</Text>
@@ -94,8 +153,13 @@ const ChatView = ({ chat, onBack }: any) => {
             placeholder="Сообщение..."
             value={inputText}
             onChangeText={setInputText}
+            editable={!sending}
           />
-          <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
+          <TouchableOpacity
+            style={[styles.sendButton, sending && { opacity: 0.5 }]}
+            onPress={handleSend}
+            disabled={sending}
+          >
             <MaterialIcons name="send" color={"white"} size={18} />
           </TouchableOpacity>
         </View>
@@ -105,7 +169,7 @@ const ChatView = ({ chat, onBack }: any) => {
 };
 
 export default function ChatScreen() {
-  const [selectedChat, setSelectedChat] = useState(null);
+  const [selectedChat, setSelectedChat] = useState<ChatRoom | null>(null);
 
   return selectedChat ? (
     <ChatView chat={selectedChat} onBack={() => setSelectedChat(null)} />
@@ -139,6 +203,7 @@ const styles = StyleSheet.create({
   lastMessage: {
     fontSize: 14,
     color: "#666",
+    marginTop: 4,
   },
   backButton: {
     padding: 16,
@@ -190,9 +255,5 @@ const styles = StyleSheet.create({
     height: 35,
     alignItems: "center",
     justifyContent: "center",
-  },
-  sendButtonText: {
-    fontSize: 16,
-    color: "#fff",
   },
 });
