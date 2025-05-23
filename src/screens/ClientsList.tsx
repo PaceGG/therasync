@@ -67,10 +67,10 @@ export default function App() {
       <Modal visible={modalVisible} transparent animationType="fade">
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <TouchableOpacity style={styles.modalItem}>
+            {/* <TouchableOpacity style={styles.modalItem}>
               <Feather name="edit" size={20} color={Colors.icon} />
               <Text style={styles.modalText}>Заметки</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
             <TouchableOpacity style={styles.modalItem}>
               <Feather name="check-square" size={20} color={Colors.icon} />
               <Text style={styles.modalText}>Задания пользователя</Text>
