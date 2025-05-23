@@ -15,9 +15,13 @@ import { getChatRooms, getMessages, sendMessage } from "../services/chat";
 import { ChatRoom, Message, User } from "../types";
 import { getUserById, getUserId } from "../services/auth";
 
+// ChatSelection
 const ChatSelection = ({ onSelectChat }: any) => {
   const [chatRooms, setChatRooms] = useState<ChatRoom[]>([]);
+  // interlocutors по room.id для отображения имени собеседника
   const [interlocutors, setInterlocutors] = useState<Record<number, User>>({});
+  // usersMap для senderId последнего сообщения, чтобы отображать имя отправителя
+  const [usersMap, setUsersMap] = useState<Record<number, User>>({});
   const [lastMessages, setLastMessages] = useState<
     Record<number, Message | undefined>
   >({});
@@ -30,8 +34,9 @@ const ChatSelection = ({ onSelectChat }: any) => {
       const rooms = await getChatRooms(userId);
       setChatRooms(rooms);
 
-      const usersMap: Record<number, User> = {};
-      const messagesMap: Record<number, Message | undefined> = {};
+      const interlocutorsMap: Record<number, User> = {};
+      const lastMessagesMap: Record<number, Message | undefined> = {};
+      const usersById: Record<number, User> = {};
 
       await Promise.all(
         rooms.map(async (room) => {
@@ -39,15 +44,26 @@ const ChatSelection = ({ onSelectChat }: any) => {
             room.participant1Id === userId
               ? room.participant2Id
               : room.participant1Id;
-          const user = await getUserById(interlocutorId);
-          usersMap[room.id] = user;
+          const interlocutorUser = await getUserById(interlocutorId);
+          interlocutorsMap[room.id] = interlocutorUser;
+
           const messages = await getMessages(room.id);
-          messagesMap[room.id] = messages[messages.length - 1];
+          const lastMsg = messages[messages.length - 1];
+          lastMessagesMap[room.id] = lastMsg;
+
+          if (lastMsg) {
+            // Добавляем отправителя последнего сообщения в usersById, если его ещё нет
+            if (!usersById[lastMsg.senderId]) {
+              const senderUser = await getUserById(lastMsg.senderId);
+              usersById[lastMsg.senderId] = senderUser;
+            }
+          }
         })
       );
 
-      setInterlocutors(usersMap);
-      setLastMessages(messagesMap);
+      setInterlocutors(interlocutorsMap);
+      setLastMessages(lastMessagesMap);
+      setUsersMap(usersById);
     }
 
     loadChats();
@@ -61,17 +77,34 @@ const ChatSelection = ({ onSelectChat }: any) => {
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={{ paddingBottom: 16 }}
         renderItem={({ item }) => {
-          const user = interlocutors[item.id];
+          const interlocutorUser = interlocutors[item.id];
           const message = lastMessages[item.id];
+          const sender = message ? usersMap[message.senderId] : null;
+          const senderName =
+            sender?.id === currentUserId
+              ? "Вы"
+              : sender
+              ? `${sender.lastName} ${sender.firstName}`
+              : "";
+
           return (
             <TouchableOpacity
               style={styles.chatItem}
-              onPress={() => onSelectChat({ room: item, user })}
+              onPress={() =>
+                onSelectChat({ room: item, user: interlocutorUser })
+              }
             >
               <Text style={styles.chatName}>
-                {user ? `${user.lastName} ${user.firstName}` : "..."}
+                {interlocutorUser
+                  ? `${interlocutorUser.lastName} ${interlocutorUser.firstName}`
+                  : "..."}
               </Text>
-              <Text style={styles.lastMessage}>{message?.text ?? ""}</Text>
+              {message && (
+                <Text style={styles.lastMessage}>
+                  <Text style={{ fontWeight: "bold" }}>{senderName}: </Text>
+                  {message.text}
+                </Text>
+              )}
             </TouchableOpacity>
           );
         }}
@@ -157,6 +190,7 @@ const ChatView = ({
   );
 };
 
+// ChatScreen
 export default function ChatScreen() {
   const [selectedChat, setSelectedChat] = useState<{
     room: ChatRoom;

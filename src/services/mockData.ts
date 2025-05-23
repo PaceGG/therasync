@@ -20,8 +20,8 @@ export const mockChatRooms: ChatRoom[] = [
 export const mockMessages: Message[] = [
   {
     id: 1,
-    roomId: 1,
-    senderId: 1,
+    roomId: 2,
+    senderId: 13,
     text: "Hello",
     timestamp: new Date().toISOString(),
   },
