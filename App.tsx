@@ -5,6 +5,8 @@ import YandexAuthScreen from "./src/screens/AuthScreen";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { TOKEN_KEY } from "./src/api";
 
+AsyncStorage.clear();
+
 export default function App() {
   const [token, setToken] = useState<string | null>();
 
