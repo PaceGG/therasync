@@ -51,7 +51,13 @@ export default function App() {
       };
       setUserToAdd(user);
       setConfirmAddVisible(true);
-    } catch (e) {}
+    } catch (e) {
+      if (e instanceof Error && e.message === "USER_NOT_FOUND")
+        ToastAndroid.show("Пользователь не найден", ToastAndroid.SHORT);
+      else if (e instanceof Error && e.message === "CLIENT_IS_EXISTS")
+        ToastAndroid.show("Клиент уже добавлен", ToastAndroid.SHORT);
+      else console.error("Ошибка при добавлении клиента:", e);
+    }
   };
 
   const confirmAddClient = async () => {
@@ -62,7 +68,7 @@ export default function App() {
       ToastAndroid.show("Клиент добавлен", ToastAndroid.SHORT);
     } catch (e) {
       if (e instanceof Error && e.message === "USER_NOT_FOUND")
-        ToastAndroid.show("Клиент не найден", ToastAndroid.SHORT);
+        ToastAndroid.show("Пользователь не найден", ToastAndroid.SHORT);
       else if (e instanceof Error && e.message === "CLIENT_IS_EXISTS")
         ToastAndroid.show("Клиент уже добавлен", ToastAndroid.SHORT);
       else console.error("Ошибка при добавлении клиента:", e);
