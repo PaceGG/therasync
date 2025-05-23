@@ -26,13 +26,13 @@ export default function App() {
   };
 
   return (
-    // <>
-    //   {!token ? (
-    //     <YandexAuthScreen setMainToken={setMainToken} />
-    //   ) : (
-    //     <Navigation logout={logout} />
-    //   )}
-    // </>
-    <Navigation logout={logout} />
+    <>
+      {!token ? (
+        <YandexAuthScreen setMainToken={setMainToken} />
+      ) : (
+        <Navigation logout={logout} />
+      )}
+    </>
+    // <Navigation logout={logout} />
   );
 }

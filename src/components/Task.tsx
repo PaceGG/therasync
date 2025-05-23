@@ -36,7 +36,7 @@ export default function Task({ title, startTime, endTime, complete }: Props) {
             { backgroundColor: complete ? "#b8c0fe" : "#c2c2c2" },
           ]}
         />
-        <View style={{ justifyContent: "center" }}>
+        <View style={{ justifyContent: "center", width: "80%" }}>
           <Text style={{ fontSize: 15 }}>{title}</Text>
           <Text style={{ color: "#555" }}>
             {formatTime(startTime)} - {formatTime(endTime)}
