@@ -1,11 +1,10 @@
-import { User } from '../types/auth';
-import { mockUser } from './mockData';
+import { User } from "../types/auth";
+import { mockUsers } from "./mockData";
 
-export const getUser = async (): Promise<User> => {
-  return mockUser;
-};
+// export const getUser = async (): Promise<User> => {
+//   return mockUsers;
+// };
 
-export const updateUser = async (data: Partial<User>): Promise<User> => {
-  Object.assign(mockUser, data);
-  return mockUser;
+export const getUserById = async (id: number): Promise<User | null> => {
+  return mockUsers.find((c) => c.id === id) || null;
 };
