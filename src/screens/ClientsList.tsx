@@ -13,12 +13,19 @@ import {
 import ClientItem from "../components/ClientItem";
 import { Ionicons, Feather, MaterialIcons } from "@expo/vector-icons";
 import { Colors } from "../constants/colors";
-import { getClientsByPsychologist, deleteClient } from "../services/client";
+import { getUserById } from "../services/auth";
+import {
+  getClientsByPsychologist,
+  addClient,
+  deleteClient,
+} from "../services/client";
 import { Client } from "../types";
 
 export default function App() {
   const [clientsList, setClientsList] = useState<Client[]>([]);
   const [selectedClientId, setSelectedClientId] = useState<number | null>(null);
+  const [addModalVisible, setAddModalVisible] = useState(false);
+  const [newClientId, setNewClientId] = useState<string>("");
   const [modalVisible, setModalVisible] = useState(false);
   const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -30,6 +37,27 @@ export default function App() {
     };
     fetchClients();
   }, []);
+
+  const handleAddClient = async () => {
+    try {
+      const user = await getUserById(Number(newClientId));
+      if (!user) throw new Error("USER_NOT_FOUND");
+      const client: Client = {
+        id: user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+      };
+      await addClient(client);
+      // setClientsList((prev) => [...prev, client]);
+      setAddModalVisible(false);
+      setNewClientId("");
+    } catch (e) {
+      if (e instanceof Error && e.message === "USER_NOT_FOUND")
+        ToastAndroid.show("Клиент не найден", ToastAndroid.SHORT);
+      if (e instanceof Error && e.message === "CLIENT_IS_EXISTS")
+        ToastAndroid.show("Клиент уже добавлен", ToastAndroid.SHORT);
+    }
+  };
 
   const handleMorePress = (id: number) => {
     setSelectedClientId(id);
@@ -74,8 +102,11 @@ export default function App() {
           value={searchQuery}
           onChangeText={setSearchQuery}
         />
-        <TouchableOpacity style={styles.addButton}>
-          <Ionicons name="add" size={24} color="#555" />
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={() => setAddModalVisible(true)}
+        >
+          <Ionicons name="add" size={24} color="white" />
         </TouchableOpacity>
       </View>
       <FlatList
@@ -88,6 +119,43 @@ export default function App() {
           />
         )}
       />
+
+      {/* Модалка добавления клиента */}
+      <Modal visible={addModalVisible} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View
+            style={[
+              styles.modalContent,
+              { paddingVertical: 24, minHeight: 180 },
+            ]}
+          >
+            <Text
+              style={[styles.modalText, { fontSize: 18, marginBottom: 16 }]}
+            >
+              Введите ID клиента
+            </Text>
+            <TextInput
+              style={[styles.searchInput, { marginBottom: 20 }]}
+              placeholder="ID клиента"
+              value={newClientId}
+              onChangeText={setNewClientId}
+              keyboardType="numeric"
+            />
+            <View
+              style={{ flexDirection: "row", justifyContent: "space-between" }}
+            >
+              <TouchableOpacity onPress={() => setAddModalVisible(false)}>
+                <Text style={styles.modalText}>Отмена</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleAddClient}>
+                <Text style={[styles.modalText, { color: Colors.icon }]}>
+                  Добавить
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       {/* Модалка клиента */}
       <Modal visible={modalVisible} transparent animationType="fade">
@@ -173,7 +241,7 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   addButton: {
-    backgroundColor: "#ddd",
+    backgroundColor: Colors.primary,
     borderRadius: 8,
     padding: 8,
   },

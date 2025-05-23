@@ -22,12 +22,14 @@ export const mockMessages: Message[] = [
   },
 ];
 
-export const mockUser: User = {
-  id: 1,
-  firstName: "Вася",
-  lastName: "Пупкин",
-  role: "CLIENT",
-};
+export const mockUsers: User[] = [
+  {
+    id: 13,
+    firstName: "Вася",
+    lastName: "Пупкин",
+    role: "CLIENT",
+  },
+];
 
 export const mockClients: Client[] = [
   { id: 1, firstName: "Анна", lastName: "Иванова" },
