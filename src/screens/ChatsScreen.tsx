@@ -14,8 +14,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { Colors } from "../constants/colors";
 import type { ChatRoom, Message } from "../types/chat";
 import { getChatRooms, getMessages, sendMessage } from "../services/chat";
-
-const USER_ID = 1; // Текущий пользователь (для мок-сервиса)
+import { getUserId } from "../services/auth";
 
 const ChatSelection = ({
   onSelectChat,
@@ -27,11 +26,14 @@ const ChatSelection = ({
     {}
   );
   const [loading, setLoading] = useState(true);
+  const [userId, setUserId] = useState<number>();
 
   useEffect(() => {
     async function fetchChats() {
       setLoading(true);
-      const rooms = await getChatRooms(USER_ID);
+      const userId = await getUserId();
+      setUserId(userId);
+      const rooms = await getChatRooms(userId);
       setChatRooms(rooms);
 
       const messagesPromises = rooms.map((room) => getMessages(room.id));
@@ -86,9 +88,12 @@ const ChatView = ({ chat, onBack }: { chat: ChatRoom; onBack: () => void }) => {
   const [inputText, setInputText] = useState("");
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [userId, setUserId] = useState<number>(-1);
 
   useEffect(() => {
     async function fetchMessages() {
+      const userId = await getUserId();
+      setUserId(userId);
       setLoading(true);
       const msgs = await getMessages(chat.id);
       setMessages(msgs);
@@ -101,7 +106,7 @@ const ChatView = ({ chat, onBack }: { chat: ChatRoom; onBack: () => void }) => {
     if (inputText.trim() === "") return;
     setSending(true);
     try {
-      const newMsg = await sendMessage(chat.id, USER_ID, inputText.trim());
+      const newMsg = await sendMessage(chat.id, userId, inputText.trim());
       setMessages((prev) => [...prev, newMsg]);
       setInputText("");
     } catch (e) {
@@ -138,7 +143,7 @@ const ChatView = ({ chat, onBack }: { chat: ChatRoom; onBack: () => void }) => {
             <View
               style={[
                 styles.messageBubble,
-                item.senderId === USER_ID
+                item.senderId === userId
                   ? styles.userMessage
                   : styles.otherMessage,
               ]}
