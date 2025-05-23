@@ -1,5 +1,5 @@
 import { Text, Image, View, TouchableOpacity, Alert } from "react-native";
-import { ScrollView, StyleSheet, TextInput } from "react-native";
+import { ScrollView, StyleSheet } from "react-native";
 import { Colors } from "../constants/colors";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
@@ -16,11 +16,8 @@ type Props = {
 
 export default function ProfileScreen({ logout }: Props) {
   const [avatarUri, setAvatarUri] = useState<string>("");
-  const [editing, setEditing] = useState(false);
-  const [inputText, setInputText] = useState("");
-  const [username, setUsername] = useState("Ваше имя");
+  const [realName, setRealName] = useState("Имя не найдено");
   const [screen, setScreen] = useState<string>("profile");
-
   const isClient = true;
 
   useEffect(() => {
@@ -29,6 +26,18 @@ export default function ProfileScreen({ logout }: Props) {
         await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== "granted") {
         Alert.alert("Ошибка", "Нужно разрешение на доступ к галерее");
+      }
+
+      // Загружаем профиль из AsyncStorage
+      const json = await AsyncStorage.getItem("YANDEX_PROFILE");
+      if (json) {
+        try {
+          const profile = JSON.parse(json);
+          setRealName(profile.realName || "Имя не найдено");
+          if (profile.avatarUrl) setAvatarUri(profile.avatarUrl);
+        } catch (e) {
+          console.warn("Ошибка чтения профиля:", e);
+        }
       }
     })();
   }, []);
@@ -40,23 +49,9 @@ export default function ProfileScreen({ logout }: Props) {
       aspect: [1, 1],
       quality: 1,
     });
-
     if (!result.canceled) {
       setAvatarUri(result.assets[0].uri);
     }
-  };
-
-  const handlePress = () => {
-    setEditing(true);
-    setInputText(username);
-  };
-
-  const handleConfirm = () => {
-    if (inputText.trim()) {
-      setUsername(inputText);
-    }
-    setEditing(false);
-    setInputText("");
   };
 
   return (
@@ -81,33 +76,17 @@ export default function ProfileScreen({ logout }: Props) {
                     : require("../assets/noavatar.png")
                 }
                 style={styles.avatar}
-              ></Image>
+              />
             </TouchableOpacity>
-            {editing ? (
-              <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <TextInput
-                  value={inputText}
-                  onChangeText={setInputText}
-                  placeholder="Ваше имя"
-                />
-                <TouchableOpacity onPress={handleConfirm}>
-                  <MaterialIcons name="check" size={24} color={Colors.icon} />
-                </TouchableOpacity>
-              </View>
-            ) : (
-              <TouchableOpacity
-                style={{ display: "flex", flexDirection: "row" }}
-                onPress={handlePress}
-              >
-                <MaterialIcons
-                  name="edit"
-                  size={24}
-                  color={Colors.icon}
-                  style={{ marginRight: 5 }}
-                ></MaterialIcons>
-                <Text style={{ fontSize: 20 }}>{username}</Text>
-              </TouchableOpacity>
-            )}
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <MaterialIcons
+                name="person"
+                size={24}
+                color={Colors.icon}
+                style={{ marginRight: 5 }}
+              />
+              <Text style={{ fontSize: 20 }}>{realName}</Text>
+            </View>
           </View>
 
           {/* user options */}

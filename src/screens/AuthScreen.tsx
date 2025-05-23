@@ -45,7 +45,6 @@ export default function AuthScreen({ setMainToken }: Props) {
   useEffect(() => {
     if (response?.type === "success") {
       const code = response.params.code;
-
       AuthSession.exchangeCodeAsync(
         {
           clientId,
@@ -60,11 +59,41 @@ export default function AuthScreen({ setMainToken }: Props) {
         .then((res) => {
           const accessToken = res.accessToken;
           setToken(accessToken);
-          AsyncStorage.setItem(TOKEN_KEY, accessToken);
           setMainToken(accessToken);
+
+          // Сохраняем токен
+          AsyncStorage.setItem(TOKEN_KEY, accessToken);
+
+          // Загружаем данные профиля
+          return fetch("https://login.yandex.ru/info?format=json", {
+            headers: {
+              Authorization: `OAuth ${accessToken}`,
+            },
+          });
+        })
+        .then((res) => res.json())
+        .then((profile) => {
+          const avatarUrl = profile.is_avatar_empty
+            ? null
+            : `https://avatars.yandex.net/get-yapic/${profile.default_avatar_id}/islands-retina-200`;
+
+          const userData = {
+            id: profile.id,
+            login: profile.login,
+            displayName: profile.display_name,
+            realName: profile.real_name,
+            email: profile.default_email,
+            avatarUrl,
+          };
+
+          // Сохраняем профиль
+          return AsyncStorage.setItem(
+            "YANDEX_PROFILE",
+            JSON.stringify(userData)
+          );
         })
         .catch((err) => {
-          console.error("Ошибка получения токена:", err);
+          console.error("Ошибка при получении профиля:", err);
         });
     }
   }, [response]);
