@@ -104,7 +104,11 @@ const ChatView = ({ chat, onBack }: any) => {
   };
 
   return (
-    <KeyboardAvoidingView style={styles.container}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior="height"
+      keyboardVerticalOffset={80}
+    >
       <SafeAreaView style={{ flex: 1 }}>
         <TouchableOpacity onPress={onBack} style={styles.backButton}>
           <Text style={styles.backText}>{"<"} Назад</Text>
