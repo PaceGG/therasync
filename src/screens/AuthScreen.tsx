@@ -1,8 +1,19 @@
 import React, { useEffect, useState } from "react";
-import { Button, Text, View, ActivityIndicator } from "react-native";
+import {
+  Button,
+  Text,
+  View,
+  ActivityIndicator,
+  ImageBackground,
+  TouchableOpacity,
+  Image,
+  StyleSheet,
+} from "react-native";
 import * as AuthSession from "expo-auth-session";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { TOKEN_KEY } from "../api";
+import Header from "../components/Header";
+import { Colors } from "../constants/colors";
 
 const discovery = {
   authorizationEndpoint: "https://oauth.yandex.com/authorize",
@@ -107,12 +118,56 @@ export default function AuthScreen({ setMainToken }: Props) {
   }
 
   return (
-    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      <Button
-        disabled={!request}
-        title="Войти через Яндекс"
-        onPress={() => promptAsync({ useProxy: true } as any)}
-      />
+    <View>
+      <View style={{ paddingBottom: 15 }}>
+        <Header />
+      </View>
+      <ImageBackground source={require("../assets/background.png")}>
+        <View
+          style={{
+            height: "100%",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => promptAsync({ useProxy: true } as any)}
+            activeOpacity={0.8}
+          >
+            <View style={styles.content}>
+              <Text style={styles.text}>Войти через Яндекс</Text>
+            </View>
+          </TouchableOpacity>
+        </View>
+      </ImageBackground>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  button: {
+    backgroundColor: Colors.primary,
+    borderRadius: 100,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    elevation: 3,
+  },
+  content: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  logo: {
+    width: 24,
+    height: 24,
+    marginRight: 10,
+    borderRadius: 4,
+  },
+  text: {
+    fontSize: 18,
+    color: "white",
+    fontWeight: "600",
+  },
+});
