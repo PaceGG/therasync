@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   Alert,
   ImageBackground,
+  BackHandler,
 } from "react-native";
 import { ScrollView, StyleSheet } from "react-native";
 import { Colors } from "../constants/colors";
@@ -14,6 +15,7 @@ import UserOption from "../components/UserOption";
 import ClientTask from "../components/ClientTask";
 import ClientsList from "./ClientsList";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import UserInfoScreen from "./UserInfoScreen";
 
 type Props = {
   logout: () => void;
@@ -21,34 +23,92 @@ type Props = {
 
 export default function ProfileScreen({ logout }: Props) {
   const [avatarUri, setAvatarUri] = useState<string>("");
-  const [realName, setRealName] = useState("Имя не найдено");
+  const [firstName, setFirstName] = useState<string>("Имя не найдено");
+  const [lastName, setLastName] = useState<string>("Фамилия не найдена");
   const [screen, setScreen] = useState<string>("profile");
   const isClient = true;
 
   useEffect(() => {
     (async () => {
-      const json = await AsyncStorage.getItem("YANDEX_PROFILE");
-      if (json) {
-        try {
-          const profile = JSON.parse(json);
-          setRealName(profile.realName || "Пользователь");
+      const first = await getFirstName();
+      const last = await getLastName();
+      setFirstName(first);
+      setLastName(last);
+
+      try {
+        const yandexJson = await AsyncStorage.getItem("YANDEX_PROFILE");
+        if (yandexJson) {
+          const profile = JSON.parse(yandexJson);
           if (profile.avatarUrl) {
             setAvatarUri(profile.avatarUrl);
           }
-        } catch (e) {
-          console.warn("Ошибка чтения профиля:", e);
         }
+      } catch (e) {
+        console.warn("Ошибка чтения профиля:", e);
       }
+
+      const backHandler = BackHandler.addEventListener(
+        "hardwareBackPress",
+        () => {
+          handleBackButton();
+          return true;
+        }
+      );
     })();
   }, []);
+
+  const getFirstName = async (): Promise<string> => {
+    try {
+      const [yandexJson, appFirstName] = await Promise.all([
+        AsyncStorage.getItem("YANDEX_PROFILE"),
+        AsyncStorage.getItem("appFirstName"),
+      ]);
+      if (yandexJson) {
+        const profile = JSON.parse(yandexJson);
+        if (appFirstName) {
+          return appFirstName;
+        }
+        return profile.firstName || "Пользователь";
+      }
+      return "Пользователь";
+    } catch (e) {
+      console.warn("Ошибка чтения имени из стоража:", e);
+      return "Пользователь";
+    }
+  };
+
+  const getLastName = async (): Promise<string> => {
+    try {
+      const [yandexJson, appLastName] = await Promise.all([
+        AsyncStorage.getItem("YANDEX_PROFILE"),
+        AsyncStorage.getItem("appLastName"),
+      ]);
+      if (yandexJson) {
+        const profile = JSON.parse(yandexJson);
+        if (appLastName) {
+          return appLastName;
+        }
+        return profile.lastName || "";
+      }
+      return "";
+    } catch (e) {
+      console.warn("Ошибка чтения фамилии из стоража:", e);
+      return "";
+    }
+  };
+
+  const handleBackButton = async () => {
+    setScreen("profile");
+    const first = await getFirstName();
+    const last = await getLastName();
+    setFirstName(first);
+    setLastName(last);
+  };
 
   return (
     <>
       {screen !== "profile" && (
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => setScreen("profile")}
-        >
+        <TouchableOpacity style={styles.backButton} onPress={handleBackButton}>
           <MaterialIcons name="arrow-back" size={24} color={Colors.icon} />
         </TouchableOpacity>
       )}
@@ -68,14 +128,16 @@ export default function ProfileScreen({ logout }: Props) {
                 }
                 style={styles.avatar}
               />
-              <Text style={{ fontSize: 20 }}>{realName}</Text>
+              <Text style={{ fontSize: 20 }}>
+                {firstName} {lastName}
+              </Text>
             </View>
 
             {/* user options */}
             <UserOption
               iconName="person"
               title="Личные данные"
-              func={() => {}}
+              func={() => setScreen("UserInfo")}
             />
             <UserOption iconName="settings" title="Настройки" func={() => {}} />
             {isClient && (
@@ -101,6 +163,7 @@ export default function ProfileScreen({ logout }: Props) {
         </ImageBackground>
       )}
       {screen === "ClientsList" && <ClientsList />}
+      {screen === "UserInfo" && <UserInfoScreen />}
     </>
   );
 }
