@@ -33,5 +33,6 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 16,
     color: "#000",
+    maxWidth: "90%",
   },
 });
