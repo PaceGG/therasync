@@ -12,12 +12,12 @@ import {
 import ClientItem from "../components/ClientItem";
 import { Ionicons, Feather, MaterialIcons } from "@expo/vector-icons";
 import { Colors } from "../constants/colors";
-import { getClientsByPsychologist } from "../services/client";
+import { getClientsByPsychologist, deleteClient } from "../services/client";
 import { Client } from "../types";
 
 export default function App() {
   const [clientsList, setClientsList] = useState<Client[]>([]);
-  const [selectedClient, setSelectedClient] = useState<string | null>(null);
+  const [selectedClientId, setSelectedClientId] = useState<number | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -29,9 +29,23 @@ export default function App() {
     fetchClients();
   }, []);
 
-  const handleMorePress = (name: string) => {
-    setSelectedClient(name);
+  const handleMorePress = (id: number) => {
+    setSelectedClientId(id);
     setModalVisible(true);
+  };
+
+  const handleDelete = async () => {
+    if (selectedClientId === null) return;
+
+    try {
+      await deleteClient(selectedClientId);
+      setClientsList((prev) => prev.filter((c) => c.id !== selectedClientId));
+    } catch (e) {
+      console.error("Ошибка при удалении клиента:", e);
+    } finally {
+      setModalVisible(false);
+      setSelectedClientId(null);
+    }
   };
 
   const filteredClients = clientsList.filter((client) =>
@@ -60,7 +74,7 @@ export default function App() {
         renderItem={({ item }) => (
           <ClientItem
             name={`${item.firstName} ${item.lastName}`}
-            onMorePress={() => handleMorePress(item.lastName)}
+            onMorePress={() => handleMorePress(item.id)}
           />
         )}
       />
@@ -75,7 +89,7 @@ export default function App() {
               <Feather name="check-square" size={20} color={Colors.icon} />
               <Text style={styles.modalText}>Задания пользователя</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.modalItem}>
+            <TouchableOpacity style={styles.modalItem} onPress={handleDelete}>
               <MaterialIcons name="delete" size={20} color="red" />
               <Text style={[styles.modalText, { color: "red" }]}>
                 Удалить клиента
