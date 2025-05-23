@@ -1,21 +1,5 @@
 import { AppointmentData, Appointment } from "../types";
-
-const mockAppointments: Appointment[] = [
-  {
-    id: 1,
-    date: "2025-06-13",
-    startTime: "18:00",
-    endTime: "19:00",
-    clientId: 8,
-  },
-  {
-    id: 2,
-    date: "2025-06-14",
-    startTime: "16:00",
-    endTime: "17:00",
-    clientId: 9,
-  },
-];
+import { mockAppointments } from "./mockData";
 
 export const createAppointment = async (
   data: AppointmentData
