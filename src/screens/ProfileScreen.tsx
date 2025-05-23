@@ -108,7 +108,7 @@ export default function ProfileScreen({ logout }: Props) {
 const styles = StyleSheet.create({
   backButton: {
     position: "absolute",
-    top: -55,
+    top: -45,
     left: 25,
     zIndex: 300,
   },
