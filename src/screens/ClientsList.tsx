@@ -59,7 +59,7 @@ export default function App() {
         keyExtractor={(item: Client) => item.id.toString()}
         renderItem={({ item }) => (
           <ClientItem
-            name={item.firstName}
+            name={`${item.firstName} ${item.lastName}`}
             onMorePress={() => handleMorePress(item.lastName)}
           />
         )}
@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#dce7ff",
     borderRadius: 12,
     padding: 16,
-    width: 220,
+    width: 250,
   },
   modalItem: {
     flexDirection: "row",
