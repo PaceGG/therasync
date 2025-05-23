@@ -4,11 +4,9 @@ import { Colors } from "../constants/colors";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import UserOption from "../components/UserOption";
-import * as ImagePicker from "expo-image-picker";
 import ClientTask from "../components/ClientTask";
 import ClientsList from "./ClientsList";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { TOKEN_KEY } from "../api";
 
 type Props = {
   logout: () => void;
@@ -22,37 +20,21 @@ export default function ProfileScreen({ logout }: Props) {
 
   useEffect(() => {
     (async () => {
-      const { status } =
-        await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== "granted") {
-        Alert.alert("Ошибка", "Нужно разрешение на доступ к галерее");
-      }
-
-      // Загружаем профиль из AsyncStorage
       const json = await AsyncStorage.getItem("YANDEX_PROFILE");
+      console.log(json);
       if (json) {
         try {
           const profile = JSON.parse(json);
-          setRealName(profile.realName || "Имя не найдено");
-          if (profile.avatarUrl) setAvatarUri(profile.avatarUrl);
+          setRealName(profile.realName || "Пользователь");
+          if (profile.avatarUrl) {
+            setAvatarUri(profile.avatarUrl);
+          }
         } catch (e) {
           console.warn("Ошибка чтения профиля:", e);
         }
       }
     })();
   }, []);
-
-  const pickImage = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 1,
-    });
-    if (!result.canceled) {
-      setAvatarUri(result.assets[0].uri);
-    }
-  };
 
   return (
     <>
@@ -68,25 +50,15 @@ export default function ProfileScreen({ logout }: Props) {
         <ScrollView style={styles.mainContainer}>
           {/* user header */}
           <View style={styles.userHeader}>
-            <TouchableOpacity onPress={pickImage}>
-              <Image
-                source={
-                  avatarUri
-                    ? { uri: avatarUri }
-                    : require("../assets/noavatar.png")
-                }
-                style={styles.avatar}
-              />
-            </TouchableOpacity>
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <MaterialIcons
-                name="person"
-                size={24}
-                color={Colors.icon}
-                style={{ marginRight: 5 }}
-              />
-              <Text style={{ fontSize: 20 }}>{realName}</Text>
-            </View>
+            <Image
+              source={
+                avatarUri
+                  ? { uri: avatarUri }
+                  : require("../assets/noavatar.png")
+              }
+              style={styles.avatar}
+            />
+            <Text style={{ fontSize: 20 }}>{realName}</Text>
           </View>
 
           {/* user options */}
