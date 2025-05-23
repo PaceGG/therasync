@@ -10,6 +10,11 @@ export const mockChatRooms: ChatRoom[] = [
     participant1Id: 1,
     participant2Id: 2,
   },
+  {
+    id: 2,
+    participant1Id: 1709255700,
+    participant2Id: 13,
+  },
 ];
 
 export const mockMessages: Message[] = [
