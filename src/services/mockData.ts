@@ -41,6 +41,11 @@ export const mockClients: Client[] = [
   { id: 9, firstName: "Татьяна", lastName: "Морозова" },
   { id: 10, firstName: "Сергей", lastName: "Петров" },
   { id: 11, firstName: "Find", lastName: "Me" },
+  {
+    id: 12,
+    firstName: "ОченьбольшоеимяОченьбольшоеимяОченьбольшоеимя",
+    lastName: "ОченьбольшоеимяОченьбольшоеимяОченьбольшоеимя",
+  },
 ];
 
 export const mockTasks: Task[] = [

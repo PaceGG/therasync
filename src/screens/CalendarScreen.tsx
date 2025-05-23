@@ -103,7 +103,7 @@ export default function CalendarScreen() {
 
   useEffect(() => {
     fetchAppointments();
-    if (isClient) fetchClients();
+    if (!isClient) fetchClients();
   }, []);
 
   const handleAddRecord = () => {
@@ -207,7 +207,7 @@ export default function CalendarScreen() {
                 {format(new Date(selected), "d MMMM", { locale: ru })}
               </Text>
             </View>
-            <ScrollView style={{ marginTop: 12, maxHeight: 150 }}>
+            <ScrollView style={{ marginTop: 12 }}>
               {appointmentsForSelectedDate.length > 0 ? (
                 appointmentsForSelectedDate.map((appt) =>
                   isClient ? (
