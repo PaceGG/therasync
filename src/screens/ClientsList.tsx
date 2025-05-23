@@ -19,13 +19,15 @@ import {
   addClient,
   deleteClient,
 } from "../services/client";
-import { Client } from "../types";
+import { Client, User } from "../types";
 
 export default function App() {
   const [clientsList, setClientsList] = useState<Client[]>([]);
   const [selectedClientId, setSelectedClientId] = useState<number | null>(null);
   const [addModalVisible, setAddModalVisible] = useState(false);
-  const [newClientId, setNewClientId] = useState<string>("");
+  const [newUserId, setNewUserId] = useState<string>("");
+  const [userToAdd, setUserToAdd] = useState<User | null>(null);
+  const [confirmAddVisible, setConfirmAddVisible] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -40,22 +42,35 @@ export default function App() {
 
   const handleAddClient = async () => {
     try {
-      const user = await getUserById(Number(newClientId));
+      const user = await getUserById(Number(newUserId));
       if (!user) throw new Error("USER_NOT_FOUND");
       const client: Client = {
         id: user.id,
         firstName: user.firstName,
         lastName: user.lastName,
       };
-      await addClient(client);
-      // setClientsList((prev) => [...prev, client]);
-      setAddModalVisible(false);
-      setNewClientId("");
+      setUserToAdd(user);
+      setConfirmAddVisible(true);
+    } catch (e) {}
+  };
+
+  const confirmAddClient = async () => {
+    if (!userToAdd) return;
+    try {
+      await addClient(userToAdd);
+      // setClientsList((prev) => [...prev, userToAdd]);
+      ToastAndroid.show("Клиент добавлен", ToastAndroid.SHORT);
     } catch (e) {
       if (e instanceof Error && e.message === "USER_NOT_FOUND")
         ToastAndroid.show("Клиент не найден", ToastAndroid.SHORT);
-      if (e instanceof Error && e.message === "CLIENT_IS_EXISTS")
+      else if (e instanceof Error && e.message === "CLIENT_IS_EXISTS")
         ToastAndroid.show("Клиент уже добавлен", ToastAndroid.SHORT);
+      else console.error("Ошибка при добавлении клиента:", e);
+    } finally {
+      setConfirmAddVisible(false);
+      setUserToAdd(null);
+      setAddModalVisible(false);
+      setNewUserId("");
     }
   };
 
@@ -137,8 +152,8 @@ export default function App() {
             <TextInput
               style={[styles.searchInput, { marginBottom: 20 }]}
               placeholder="ID клиента"
-              value={newClientId}
-              onChangeText={setNewClientId}
+              value={newUserId}
+              onChangeText={setNewUserId}
               keyboardType="numeric"
             />
             <View
@@ -148,6 +163,37 @@ export default function App() {
                 <Text style={styles.modalText}>Отмена</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={handleAddClient}>
+                <Text style={[styles.modalText, { color: Colors.icon }]}>
+                  Добавить
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Подтверждение добавления клиента */}
+      <Modal visible={confirmAddVisible} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={[styles.modalText, { marginBottom: 12 }]}>
+              Добавить клиента {`#${userToAdd?.id}`}?{"\n"}
+              <Text style={{ fontWeight: "bold" }}>
+                {userToAdd?.firstName} {userToAdd?.lastName}
+              </Text>
+            </Text>
+            <View
+              style={{ flexDirection: "row", justifyContent: "space-between" }}
+            >
+              <TouchableOpacity
+                onPress={() => {
+                  setConfirmAddVisible(false);
+                  setUserToAdd(null);
+                }}
+              >
+                <Text style={styles.modalText}>Отмена</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={confirmAddClient}>
                 <Text style={[styles.modalText, { color: Colors.icon }]}>
                   Добавить
                 </Text>
