@@ -7,10 +7,13 @@ import {
   Alert,
   ImageBackground,
   ToastAndroid,
+  TouchableOpacity,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Clipboard from "expo-clipboard";
 import { Colors } from "../constants/colors";
 import CustomButton from "../components/CustomButton";
+import { MaterialIcons } from "@expo/vector-icons";
 
 export default function UserInfoScreen() {
   const [id, setId] = useState("");
@@ -52,24 +55,37 @@ export default function UserInfoScreen() {
     }
   };
 
+  const copyIdToClipboard = async () => {
+    await Clipboard.setStringAsync(id);
+    ToastAndroid.show("ID скопирован", ToastAndroid.SHORT);
+  };
+
   return (
     <ImageBackground
       style={styles.container}
       source={require("../assets/background.png")}
     >
-      <Text style={styles.label}>ID: {id}</Text>
+      <View style={styles.idRow}>
+        <Text style={styles.label}>ID: {id}</Text>
+        <TouchableOpacity onPress={copyIdToClipboard} style={styles.copyButton}>
+          <MaterialIcons name="content-copy" size={20} color="white" />
+        </TouchableOpacity>
+      </View>
+
       <Text style={styles.label}>Имя</Text>
       <TextInput
         style={styles.input}
         value={firstName}
         onChangeText={setFirstName}
       />
+
       <Text style={styles.label}>Фамилия</Text>
       <TextInput
         style={styles.input}
         value={lastName}
         onChangeText={setLastName}
       />
+
       <View style={styles.buttons}>
         <CustomButton
           title={"Сохранить"}
@@ -86,9 +102,19 @@ const styles = StyleSheet.create({
     padding: 20,
     flex: 1,
   },
+  idRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 12,
+  },
   label: {
     fontSize: 16,
-    marginTop: 12,
+  },
+  copyButton: {
+    marginLeft: 8,
+    padding: 8,
+    backgroundColor: Colors.primary,
+    borderRadius: 5,
   },
   input: {
     borderWidth: 1,

@@ -88,11 +88,14 @@ export default function AuthScreen({ setMainToken }: Props) {
             ? null
             : `https://avatars.yandex.net/get-yapic/${profile.default_avatar_id}/islands-retina-200`;
 
+          const realName = profile.real_name.split(" ");
           const userData = {
             id: profile.id,
             login: profile.login,
             displayName: profile.display_name,
             realName: profile.real_name,
+            firstName: realName[0],
+            lastName: realName[1],
             email: profile.default_email,
             avatarUrl,
           };
