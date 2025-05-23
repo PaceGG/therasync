@@ -8,6 +8,7 @@ import {
   SafeAreaView,
   KeyboardAvoidingView,
   StyleSheet,
+  BackHandler,
 } from "react-native";
 import { Colors } from "../constants/colors";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -135,6 +136,13 @@ const ChatView = ({
       setMessages(data);
     }
     loadMessages();
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      () => {
+        onBack();
+        return true;
+      }
+    );
   }, [chat]);
 
   const handleSend = async () => {
@@ -151,8 +159,8 @@ const ChatView = ({
       keyboardVerticalOffset={80}
     >
       <SafeAreaView style={{ flex: 1 }}>
-        <TouchableOpacity onPress={onBack} style={styles.backButton}>
-          <Text style={styles.backText}>{"<"} Назад</Text>
+        <TouchableOpacity style={styles.backButton} onPress={onBack}>
+          <MaterialIcons name="arrow-back" size={24} color={Colors.icon} />
         </TouchableOpacity>
         <Text style={styles.chatHeader}>
           {`${interlocutor.lastName} ${interlocutor.firstName}`}
@@ -236,7 +244,10 @@ const styles = StyleSheet.create({
     color: "#666",
   },
   backButton: {
-    padding: 16,
+    position: "absolute",
+    top: -45,
+    left: 25,
+    zIndex: 300,
   },
   backText: {
     color: "#333",
