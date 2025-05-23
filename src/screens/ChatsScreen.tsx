@@ -41,7 +41,6 @@ const ChatSelection = ({ onSelectChat }: any) => {
               : room.participant1Id;
           const user = await getUserById(interlocutorId);
           usersMap[room.id] = user;
-
           const messages = await getMessages(room.id);
           messagesMap[room.id] = messages[messages.length - 1];
         })
@@ -67,7 +66,7 @@ const ChatSelection = ({ onSelectChat }: any) => {
           return (
             <TouchableOpacity
               style={styles.chatItem}
-              onPress={() => onSelectChat(item)}
+              onPress={() => onSelectChat({ room: item, user })}
             >
               <Text style={styles.chatName}>
                 {user ? `${user.lastName} ${user.firstName}` : "..."}
@@ -81,7 +80,16 @@ const ChatSelection = ({ onSelectChat }: any) => {
   );
 };
 
-const ChatView = ({ chat, onBack }: any) => {
+// ChatView
+const ChatView = ({
+  chat,
+  interlocutor,
+  onBack,
+}: {
+  chat: ChatRoom;
+  interlocutor: User;
+  onBack: () => void;
+}) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState("");
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
@@ -113,7 +121,9 @@ const ChatView = ({ chat, onBack }: any) => {
         <TouchableOpacity onPress={onBack} style={styles.backButton}>
           <Text style={styles.backText}>{"<"} Назад</Text>
         </TouchableOpacity>
-        <Text style={styles.chatHeader}>Чат #{chat.id}</Text>
+        <Text style={styles.chatHeader}>
+          {`${interlocutor.lastName} ${interlocutor.firstName}`}
+        </Text>
         <FlatList
           data={messages}
           keyExtractor={(item) => item.id.toString()}
@@ -148,14 +158,23 @@ const ChatView = ({ chat, onBack }: any) => {
 };
 
 export default function ChatScreen() {
-  const [selectedChat, setSelectedChat] = useState<ChatRoom | null>(null);
+  const [selectedChat, setSelectedChat] = useState<{
+    room: ChatRoom;
+    user: User;
+  } | null>(null);
+
   return selectedChat ? (
-    <ChatView chat={selectedChat} onBack={() => setSelectedChat(null)} />
+    <ChatView
+      chat={selectedChat.room}
+      interlocutor={selectedChat.user}
+      onBack={() => setSelectedChat(null)}
+    />
   ) : (
     <ChatSelection onSelectChat={setSelectedChat} />
   );
 }
 
+// Styles
 const styles = StyleSheet.create({
   container: {
     flex: 1,
