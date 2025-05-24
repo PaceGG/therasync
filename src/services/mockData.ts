@@ -56,7 +56,7 @@ export const mockUsers: User[] = [
     id: 1709255700,
     firstName: "Юрий",
     lastName: "Буторин",
-    role: "PSYCHOLOGIST",
+    role: "CLIENT",
   },
 ];
 
@@ -432,6 +432,13 @@ export const mockAppointments: Appointment[] = [
   {
     id: 25,
     date: "2025-07-07",
+    startTime: "09:00",
+    endTime: "10:00",
+    clientId: 25,
+  },
+  {
+    id: 26,
+    date: "2025-05-24",
     startTime: "09:00",
     endTime: "10:00",
     clientId: 25,
