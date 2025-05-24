@@ -75,7 +75,7 @@ export default function CalendarScreen() {
   const [selected, setSelected] = useState(today);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [isRecordActive, setRecordActive] = useState<boolean>(false);
-  const isClient = false;
+  const isClient = true;
 
   const fetchClients = async () => {
     try {

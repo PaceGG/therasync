@@ -27,7 +27,7 @@ export default function ProfileScreen({ logout }: Props) {
   const [avatarUri, setAvatarUri] = useState<string>("");
   const [user, setUser] = useState<User>();
   const [screen, setScreen] = useState<string>("profile");
-  const isPsychologist = true;
+  const isPsychologist = false;
 
   useEffect(() => {
     (async () => {

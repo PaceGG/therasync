@@ -14,7 +14,10 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["**/*", "assets/fonts/MPLUSRounded1c-Regular.ttf"],
+    "assetBundlePatterns": [
+      "**/*",
+      "assets/fonts/MPLUSRounded1c-Regular.ttf"
+    ],
     "ios": {
       "supportsTablet": true
     },
@@ -23,10 +26,16 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.pacegg.therasync"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "fdfc0559-85d1-4dbf-968e-a66e5526245b"
+      }
     }
   }
 }
