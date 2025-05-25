@@ -28,7 +28,6 @@ export default function ProfileScreen({ logout }: Props) {
   const [avatarUri, setAvatarUri] = useState<string>("");
   const [user, setUser] = useState<User>();
   const [screen, setScreen] = useState<string>("profile");
-  // const isPsychologist = true;
   const [isPsychologist, setIsPsychologist] = useState(false);
 
   useEffect(() => {
@@ -37,7 +36,7 @@ export default function ProfileScreen({ logout }: Props) {
       if (!user) logout();
       setUser(user);
       setIsPsychologist(user.role === "PSYCHOLOGIST");
-
+      
       try {
         const yandexJson = await AsyncStorage.getItem("YANDEX_PROFILE");
         if (yandexJson) {

@@ -389,14 +389,14 @@ export const mockAppointments: Appointment[] = [
   },
   {
     id: 19,
-    date: "2025-05-01",
+    date: "2025-07-01",
     startTime: "14:00",
     endTime: "15:00",
     clientId: 19,
   },
   {
     id: 20,
-    date: "2025-05-02",
+    date: "2025-07-02",
     startTime: "10:00",
     endTime: "11:00",
     clientId: 20,
