@@ -56,7 +56,7 @@ export const mockUsers: User[] = [
     id: 1709255700,
     firstName: "Юрий",
     lastName: "Буторин",
-    role: "CLIENT",
+    role: "PSYCHOLOGIST",
   },
 ];
 

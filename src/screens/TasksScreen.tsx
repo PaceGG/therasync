@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -12,6 +12,8 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import AddTaskScreen from "./AddTaskScreen"; // Укажи путь, если другой
+import { getUser } from "../services/auth";
+import { User } from "../types";
 
 type Task = {
   id: string;
@@ -42,8 +44,18 @@ export default function TasksScreen({ navigation }: any) {
   const [responseText, setResponseText] = useState("");
   const [attachedFile, setAttachedFile] = useState<string | null>(null);
   const [screen, setScreen] = useState<string>("Tasks");
+  const [user, setUser] = useState<User>();
+  const [isModerator, setIsModerator] = useState(false);
 
-  const isModerator = true;
+  useEffect(() => {
+    (async () => {
+      const user = await getUser();
+      if (user) {
+        setUser(user);
+        setIsModerator(user.role === "PSYCHOLOGIST");
+      }
+    })();
+  }, []);
 
   const openTaskModal = (task: Task) => {
     setSelectedTask(task);

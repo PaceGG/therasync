@@ -79,14 +79,21 @@ export default function CalendarScreen() {
   const [user, setUser] = useState<User>();
   const [isClient, setIsClient] = useState(true);
 
-  const fetchClients = async () => {
-    try {
+  useEffect(() => {
+    (async () => {
       const user = await getUser();
       if (user) {
         setUser(user);
-        setIsClient(user.role === "CLIENT");
+        const isClient = user.role === "CLIENT";
+        setIsClient(isClient);
+        await fetchAppointments();
+        if (!isClient) await fetchClients();
       }
+    })();
+  }, []);
 
+  const fetchClients = async () => {
+    try {
       const clients = await getClientsByPsychologist();
       const map: { [id: number]: string } = {};
       clients.forEach((client) => {
@@ -108,11 +115,6 @@ export default function CalendarScreen() {
       console.error("Ошибка при получении записей:", error);
     }
   };
-
-  useEffect(() => {
-    fetchAppointments();
-    if (!isClient) fetchClients();
-  }, []);
 
   const handleAddRecord = () => {
     setRecordActive(true);

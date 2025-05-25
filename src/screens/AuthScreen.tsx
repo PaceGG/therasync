@@ -31,6 +31,7 @@ export default function AuthScreen({ setMainToken }: Props) {
   const [loading, setLoading] = useState(true);
 
   const redirectUri = AuthSession.makeRedirectUri({ useProxy: true } as any);
+  console.log(redirectUri);
   const [request, response, promptAsync] = AuthSession.useAuthRequest(
     {
       clientId,
