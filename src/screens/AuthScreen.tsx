@@ -86,7 +86,7 @@ export default function AuthScreen({ setMainToken }: Props) {
         .then((profile) => {
           const avatarUrl = profile.is_avatar_empty
             ? null
-            : `https://avatars.yandex.net/get-yapic/${profile.default_avatar_id}/islands-retina-200`;
+            : `https://avatars.mds.yandex.net/get-yapic/${profile.default_avatar_id}/islands-200`;
 
           const realName = profile.real_name.split(" ");
           const userData = {
