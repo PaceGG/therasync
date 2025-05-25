@@ -23,7 +23,8 @@ import {
   getPsychologistAppointments,
 } from "../services/appointment";
 import { getClientsByPsychologist } from "../services/client";
-import { Appointment, Client } from "../types";
+import { Appointment, Client, User } from "../types";
+import { getUser } from "../services/auth";
 
 LocaleConfig.locales["ru"] = {
   monthNames: [
@@ -75,10 +76,17 @@ export default function CalendarScreen() {
   const [selected, setSelected] = useState(today);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [isRecordActive, setRecordActive] = useState<boolean>(false);
-  const isClient = true;
+  const [user, setUser] = useState<User>();
+  const [isClient, setIsClient] = useState(true);
 
   const fetchClients = async () => {
     try {
+      const user = await getUser();
+      if (user) {
+        setUser(user);
+        setIsClient(user.role === "CLIENT");
+      }
+
       const clients = await getClientsByPsychologist();
       const map: { [id: number]: string } = {};
       clients.forEach((client) => {

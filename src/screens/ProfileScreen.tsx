@@ -18,6 +18,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import UserInfoScreen from "./UserInfoScreen";
 import { getUser } from "../services/auth";
 import { User } from "../types";
+import AppointmentHistoryScreen from "./AppointmentsHistoryScreen";
 
 type Props = {
   logout: () => void;
@@ -27,14 +28,15 @@ export default function ProfileScreen({ logout }: Props) {
   const [avatarUri, setAvatarUri] = useState<string>("");
   const [user, setUser] = useState<User>();
   const [screen, setScreen] = useState<string>("profile");
-  const isPsychologist = false;
+  const [isPsychologist, setIsPsychologist] = useState(false);
 
   useEffect(() => {
     (async () => {
       const user = await getUser();
       if (!user) logout();
       setUser(user);
-
+      setIsPsychologist(user.role === "PSYCHOLOGIST");
+      
       try {
         const yandexJson = await AsyncStorage.getItem("YANDEX_PROFILE");
         if (yandexJson) {
@@ -101,7 +103,7 @@ export default function ProfileScreen({ logout }: Props) {
               title="Личные данные"
               func={() => setScreen("UserInfo")}
             />
-            <UserOption iconName="settings" title="Настройки" func={() => {}} />
+            {/* <UserOption iconName="settings" title="Настройки" func={() => {}} /> */}
             {isPsychologist && (
               <UserOption
                 iconName={"people"}
@@ -112,8 +114,8 @@ export default function ProfileScreen({ logout }: Props) {
             {isPsychologist && (
               <UserOption
                 iconName={"history"}
-                title="История консультаций и заданий"
-                func={() => {}}
+                title="История консультаций"
+                func={() => setScreen("AppointmentsHistory")}
               />
             )}
             <UserOption
@@ -126,6 +128,7 @@ export default function ProfileScreen({ logout }: Props) {
       )}
       {screen === "ClientsList" && <ClientsList />}
       {screen === "UserInfo" && <UserInfoScreen />}
+      {screen === "AppointmentsHistory" && <AppointmentHistoryScreen />}
     </>
   );
 }
