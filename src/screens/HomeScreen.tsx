@@ -6,17 +6,21 @@ import {
   TouchableOpacity,
   Image,
   ProgressBarAndroid,
+  ImageBackground,
 } from "react-native";
 import * as Progress from "react-native-progress";
 const HomeScreen = () => {
   return (
-    <View style={styles.container}>
+    <ImageBackground
+      style={styles.container}
+      source={require("../assets/background.png")}
+    >
       <View style={styles.grid}>
         <View style={styles.item}>
           <Text style={styles.label}>Статьи</Text>
           <TouchableOpacity style={styles.card}>
             <Image
-              source={require("../assets/homeScreenIcons/icon1.png")}
+              source={require("../assets/HomeScreen/icon1.jpg")}
               style={styles.fullImage}
             />
           </TouchableOpacity>
@@ -26,7 +30,7 @@ const HomeScreen = () => {
           <Text style={styles.label}>Практики</Text>
           <TouchableOpacity style={styles.card}>
             <Image
-              source={require("../assets/homeScreenIcons/icon2.png")}
+              source={require("../assets/HomeScreen/icon2.jpg")}
               style={styles.fullImage}
             />
           </TouchableOpacity>
@@ -36,7 +40,7 @@ const HomeScreen = () => {
           <Text style={styles.label}>Задания</Text>
           <TouchableOpacity style={styles.card}>
             <Image
-              source={require("../assets/homeScreenIcons/icon3.png")}
+              source={require("../assets/HomeScreen/icon3.jpg")}
               style={styles.fullImage}
             />
           </TouchableOpacity>
@@ -46,7 +50,7 @@ const HomeScreen = () => {
           <Text style={styles.label}>Тесты</Text>
           <TouchableOpacity style={styles.card}>
             <Image
-              source={require("../assets/homeScreenIcons/icon4.png")}
+              source={require("../assets/HomeScreen/icon4.jpg")}
               style={styles.fullImage}
             />
           </TouchableOpacity>
@@ -72,7 +76,7 @@ const HomeScreen = () => {
           </TouchableOpacity>
         </View>
       </View>
-    </View>
+    </ImageBackground>
   );
 };
 
@@ -110,6 +114,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderRadius: 16,
     overflow: "hidden",
+    elevation: 5,
     shadowColor: "#000",
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -127,6 +132,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f5f5fc",
     padding: 16,
     borderRadius: 16,
+    elevation: 5,
     shadowColor: "#000",
     shadowOpacity: 0.1,
     shadowRadius: 3,

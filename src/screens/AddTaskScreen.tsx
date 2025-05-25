@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import { MaterialIcons } from "@expo/vector-icons";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -6,9 +7,10 @@ import {
   ScrollView,
   TouchableOpacity,
   StyleSheet,
-  FlatList,
   Alert,
 } from "react-native";
+import { Colors } from "../constants/colors";
+import { getTasksByClient } from "../services/task";
 
 type Task = {
   id: string;
@@ -17,7 +19,11 @@ type Task = {
   file?: string;
 };
 
-export default function AddTasksScreen() {
+type Props = {
+  goBack?: () => void;
+};
+
+export default function AddTasksScreen({ goBack }: Props) {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [title, setTitle] = useState("");
@@ -25,7 +31,6 @@ export default function AddTasksScreen() {
 
   const handleAddTask = () => {
     if (!title.trim()) return Alert.alert("Ошибка", "Введите название задания");
-
     const newTask: Task = {
       id: Date.now().toString(),
       title,
@@ -40,7 +45,12 @@ export default function AddTasksScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Все задания</Text>
+      <TouchableOpacity style={styles.backButton} onPress={goBack}>
+        <MaterialIcons name="arrow-back" size={24} color={Colors.icon} />
+      </TouchableOpacity>
+      <View style={styles.headerRow}>
+        <Text style={styles.header}>Все задания</Text>
+      </View>
 
       <View style={styles.taskListContainer}>
         <ScrollView style={styles.scrollArea}>
@@ -84,7 +94,6 @@ export default function AddTasksScreen() {
           >
             <Text style={styles.attachText}>📎 Файл</Text>
           </TouchableOpacity>
-
           <TouchableOpacity style={styles.saveButton} onPress={handleAddTask}>
             <Text style={styles.saveText}>Сохранить</Text>
           </TouchableOpacity>
@@ -101,11 +110,25 @@ const styles = StyleSheet.create({
     padding: 20,
     alignItems: "center",
   },
+  headerRow: {
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 10,
+  },
+  backButton: {
+    position: "absolute",
+    top: -45,
+    left: 25,
+    zIndex: 300,
+  },
   header: {
     fontSize: 22,
     fontWeight: "600",
-    marginBottom: 10,
     color: "#333",
+    textAlign: "center",
+    flex: 1,
   },
   taskListContainer: {
     borderWidth: 1,

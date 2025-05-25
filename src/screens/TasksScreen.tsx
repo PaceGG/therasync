@@ -8,11 +8,11 @@ import {
   Modal,
   TextInput,
   TouchableOpacity,
-  Button,
   Alert,
 } from "react-native";
-import Navigation from "../navigation";
 import { useNavigation } from "@react-navigation/native";
+import AddTaskScreen from "./AddTaskScreen"; // Укажи путь, если другой
+
 type Task = {
   id: string;
   title: string;
@@ -34,10 +34,6 @@ const initialCurrentTasks: Task[] = [
   },
 ];
 
-type TasksScreenProps = {
-  isModerator?: boolean;
-};
-
 export default function TasksScreen({ navigation }: any) {
   const [currentTasks, setCurrentTasks] = useState<Task[]>(initialCurrentTasks);
   const [completedTasks, setCompletedTasks] = useState<Task[]>([]);
@@ -45,8 +41,10 @@ export default function TasksScreen({ navigation }: any) {
   const [modalVisible, setModalVisible] = useState(false);
   const [responseText, setResponseText] = useState("");
   const [attachedFile, setAttachedFile] = useState<string | null>(null);
+  const [screen, setScreen] = useState<string>("Tasks");
 
   const isModerator = true;
+
   const openTaskModal = (task: Task) => {
     setSelectedTask(task);
     setResponseText("");
@@ -83,6 +81,10 @@ export default function TasksScreen({ navigation }: any) {
     </TouchableOpacity>
   );
 
+  if (screen === "AddTask") {
+    return <AddTaskScreen goBack={() => setScreen("Tasks")} />;
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -92,13 +94,6 @@ export default function TasksScreen({ navigation }: any) {
         />
         <View style={styles.headerWithButton}>
           <Text style={styles.headerText}>Задания Валеры</Text>
-          {isModerator && (
-            <TouchableOpacity
-              onPress={() => navigation.navigate("AddTaskScreen")}
-            >
-              <Text style={styles.addIcon}>＋</Text>
-            </TouchableOpacity>
-          )}
         </View>
       </View>
 
@@ -115,6 +110,7 @@ export default function TasksScreen({ navigation }: any) {
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => renderTaskCard(item, true)}
       />
+
       <Modal
         visible={modalVisible}
         animationType="slide"
@@ -156,6 +152,15 @@ export default function TasksScreen({ navigation }: any) {
           </View>
         </View>
       </Modal>
+
+      {isModerator && (
+        <TouchableOpacity
+          style={styles.fab}
+          onPress={() => setScreen("AddTask")}
+        >
+          <Text style={styles.fabText}>＋</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
@@ -230,21 +235,6 @@ const styles = StyleSheet.create({
     color: "#444",
     marginBottom: 10,
   },
-  input: {
-    borderColor: "#999",
-    borderWidth: 1,
-    borderRadius: 8,
-    padding: 8,
-    height: 80,
-    textAlignVertical: "top",
-    marginBottom: 10,
-  },
-  fileInfo: {
-    fontSize: 12,
-    color: "#666",
-    marginTop: 4,
-    marginBottom: 8,
-  },
   textInput: {
     borderWidth: 1,
     borderColor: "#ccc",
@@ -285,21 +275,35 @@ const styles = StyleSheet.create({
     zIndex: 1,
     padding: 5,
   },
-
   closeButtonText: {
     fontSize: 20,
     color: "#888",
-  },
-
-  addIcon: {
-    fontSize: 24,
-    color: "#555",
-    marginLeft: 8,
   },
   headerWithButton: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     width: "100%",
+  },
+  fab: {
+    position: "absolute",
+    right: 20,
+    bottom: 30,
+    backgroundColor: "#5568FE",
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 5,
+  },
+  fabText: {
+    fontSize: 32,
+    color: "#fff",
+    lineHeight: 36,
   },
 });
