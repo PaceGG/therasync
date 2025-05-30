@@ -1,12 +1,22 @@
-import api from './index';
-import { User } from '../types/auth';
+import { api, TOKEN_KEY } from "./index";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export const getUser = async (): Promise<User> => {
-  const response = await api.get('/users/me');
-  return response.data;
+export const fetchTokenFromYandex = async (yandexAccessToken: string) => {
+  const response = await api.post("/auth/yandex", yandexAccessToken, {
+    headers: { "Content-Type": "application/json" },
+  });
+  const jwt = response.data.token;
+  await AsyncStorage.setItem(TOKEN_KEY, jwt);
+  return jwt;
 };
 
-export const updateUser = async (data: Partial<User>): Promise<User> => {
-  const response = await api.put('/users', data);
-  return response.data;
+export const validateToken = async () => {
+  const token = await AsyncStorage.getItem(TOKEN_KEY);
+  if (!token) throw new Error("Нет JWT токена");
+
+  const response = await api.get("/auth/validate", {
+    params: { token },
+  });
+
+  return response.data; // { clientId: "...", role: "..." }
 };

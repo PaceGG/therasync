@@ -1,19 +1,17 @@
 import React, { useEffect, useState } from "react";
 import {
-  Button,
-  Text,
   View,
+  Text,
   ActivityIndicator,
-  ImageBackground,
   TouchableOpacity,
-  Image,
   StyleSheet,
+  ImageBackground,
 } from "react-native";
 import * as AuthSession from "expo-auth-session";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { TOKEN_KEY } from "../api";
 import Header from "../components/Header";
 import { Colors } from "../constants/colors";
+import { api, TOKEN_KEY } from "../api";
 
 const discovery = {
   authorizationEndpoint: "https://oauth.yandex.com/authorize",
@@ -31,7 +29,7 @@ export default function AuthScreen({ setMainToken }: Props) {
   const [loading, setLoading] = useState(true);
 
   const redirectUri = AuthSession.makeRedirectUri({ useProxy: true } as any);
-  console.log(redirectUri);
+
   const [request, response, promptAsync] = AuthSession.useAuthRequest(
     {
       clientId,
@@ -42,54 +40,61 @@ export default function AuthScreen({ setMainToken }: Props) {
     discovery
   );
 
-  // Загрузка токена при старте
+  // Загрузка токена при запуске
   useEffect(() => {
     AsyncStorage.getItem(TOKEN_KEY)
       .then((storedToken) => {
         if (storedToken) {
           setToken(storedToken);
+          setMainToken(storedToken);
         }
       })
       .finally(() => setLoading(false));
   }, []);
 
-  // Обработка авторизации
+  // Обработка ответа после авторизации
   useEffect(() => {
-    if (response?.type === "success") {
-      const code = response.params.code;
-      AuthSession.exchangeCodeAsync(
-        {
-          clientId,
-          code,
-          redirectUri,
-          extraParams: {
-            code_verifier: request?.codeVerifier!,
-          },
-        },
-        discovery
-      )
-        .then((res) => {
-          const accessToken = res.accessToken;
-          setToken(accessToken);
-          setMainToken(accessToken);
-
-          // Сохраняем токен
-          AsyncStorage.setItem(TOKEN_KEY, accessToken);
-
-          // Загружаем данные профиля
-          return fetch("https://login.yandex.ru/info?format=json", {
-            headers: {
-              Authorization: `OAuth ${accessToken}`,
+    const fetchTokenAndUser = async () => {
+      try {
+        if (response?.type === "success" && response.params.code) {
+          const res = await AuthSession.exchangeCodeAsync(
+            {
+              clientId,
+              code: response.params.code,
+              redirectUri,
+              extraParams: {
+                code_verifier: request?.codeVerifier!,
+              },
             },
-          });
-        })
-        .then((res) => res.json())
-        .then((profile) => {
+            discovery
+          );
+
+          const yandexAccessToken = res.accessToken;
+
+          if (!yandexAccessToken) {
+            console.error("Токен от Яндекса не получен:", res);
+            return;
+          }
+
+          await AsyncStorage.setItem(TOKEN_KEY, yandexAccessToken);
+          setToken(yandexAccessToken);
+          setMainToken(yandexAccessToken);
+
+          const profileResponse = await fetch(
+            "https://login.yandex.ru/info?format=json",
+            {
+              headers: {
+                Authorization: `OAuth ${yandexAccessToken}`,
+              },
+            }
+          );
+          const profile = await profileResponse.json();
+
           const avatarUrl = profile.is_avatar_empty
             ? null
             : `https://avatars.mds.yandex.net/get-yapic/${profile.default_avatar_id}/islands-200`;
 
-          const realName = profile.real_name.split(" ");
+          const realName = profile.real_name?.split(" ") || [];
           const userData = {
             id: profile.id,
             login: profile.login,
@@ -101,21 +106,32 @@ export default function AuthScreen({ setMainToken }: Props) {
             avatarUrl,
           };
 
-          // Сохраняем профиль
-          return AsyncStorage.setItem(
+          await AsyncStorage.setItem(
             "YANDEX_PROFILE",
             JSON.stringify(userData)
           );
-        })
-        .catch((err) => {
-          console.error("Ошибка при получении профиля:", err);
-        });
-    }
+
+          // Валидируем токен через backend
+          try {
+            const validateResponse = await api.get("/auth/validate", {
+              params: { token: yandexAccessToken },
+            });
+            console.log("Валидирован:", validateResponse.data);
+          } catch (err) {
+            console.error("Ошибка валидации токена:", err);
+          }
+        }
+      } catch (err) {
+        console.error("Ошибка авторизации:", err);
+      }
+    };
+
+    fetchTokenAndUser();
   }, [response]);
 
   if (loading) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      <View style={styles.center}>
         <ActivityIndicator size="large" />
       </View>
     );
@@ -127,13 +143,7 @@ export default function AuthScreen({ setMainToken }: Props) {
         <Header />
       </View>
       <ImageBackground source={require("../assets/background.png")}>
-        <View
-          style={{
-            height: "100%",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
+        <View style={styles.wrapper}>
           <TouchableOpacity
             style={styles.button}
             onPress={() => promptAsync({ useProxy: true } as any)}
@@ -150,6 +160,16 @@ export default function AuthScreen({ setMainToken }: Props) {
 }
 
 const styles = StyleSheet.create({
+  center: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  wrapper: {
+    height: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   button: {
     backgroundColor: Colors.primary,
     borderRadius: 100,
@@ -162,12 +182,6 @@ const styles = StyleSheet.create({
   content: {
     flexDirection: "row",
     alignItems: "center",
-  },
-  logo: {
-    width: 24,
-    height: 24,
-    marginRight: 10,
-    borderRadius: 4,
   },
   text: {
     fontSize: 18,

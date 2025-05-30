@@ -1,7 +1,7 @@
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export const api = axios.create({ baseURL: "http://localhost:8000/api" });
+export const api = axios.create({ baseURL: "http://5.129.198.170:8080" });
 
 export const TOKEN_KEY = "yandex_access_token";
 
